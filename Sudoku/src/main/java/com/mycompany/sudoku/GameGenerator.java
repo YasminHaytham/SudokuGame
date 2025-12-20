@@ -1,26 +1,25 @@
 package com.mycompany.sudoku;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public class GameGenerator {
     private RandomPairs randomPairs;
-    private SequentialValidator validator;
+    private EnhancedValidator validator;
     private static final int EASY_CELLS_Remove = 10;
     private static final int MEDIUM_CELLS_Remove = 20;
     private static final int HARD_CELLS_Remove = 25;
 
     public GameGenerator() {
         this.randomPairs = new RandomPairs();
-        this.validator = new SequentialValidator();
+        this.validator = new EnhancedValidator();
     }
 
-    public Map<DifficultyEnum, Game> generateAll(Game SourceGame) throws  SolutionInvalidException, IOException
+    public Map<DifficultyEnum, Game> generateAll(Game SourceGame) throws  SolutionInvalidException
     {
-        validator.setBoard(SourceGame.getBoard());
-        if ( !validator.isValid()) {
-            throw new SolutionInvalidException("Source Solution is  " + validator.getState());
+        GameState state = validator.validate(SourceGame);
+        if ( state != GameState.VALID) {
+            throw new SolutionInvalidException("Source Solution is  " + state);
         }
         else 
         {
@@ -35,8 +34,8 @@ public class GameGenerator {
     }
 
     public Game removeCells (Game SourceGame , int cells)
-    throws IOException {
-        int [][] originalBoard = SourceGame.getBoard().getBoard();
+    {
+        int [][] originalBoard = SourceGame.getBoard();
         int [][] copy = new int[9][9];
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -49,6 +48,6 @@ public class GameGenerator {
             int y = pair[1];
             copy[x][y] = 0;
         }
-        return new Game (copy, SourceGame.getBoard().getFilename());
+        return new Game (copy);
     }
 }
