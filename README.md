@@ -1,2 +1,2 @@
-# Sudoku
-Sudoku validator
+# Sudoku Game
+Sudoku Full Game
