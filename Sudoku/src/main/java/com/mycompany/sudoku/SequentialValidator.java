@@ -9,8 +9,20 @@ public class SequentialValidator implements Validator {
     Board board;
     List<String> errors = new ArrayList<>();
 
+    public SequentialValidator() {
+    }
     public SequentialValidator(Board board) {
         this.board = board;
+    }
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+    public String getState() {
+        if (isValid()) {
+            return "valid.";
+        } else {
+            return "invalid";
+        }
     }
 
     @Override
