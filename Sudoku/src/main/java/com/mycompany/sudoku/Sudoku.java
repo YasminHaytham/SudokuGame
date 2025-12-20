@@ -14,7 +14,7 @@ public class Sudoku {
 
     public static void main(String[] args) {
 
-    
+    /* 
         if (args.length != 2) {
             System.out.println(
                     "Please provide the input file path and validation mode (0 :sequential, 3: 3 threads, 27: 27 threads).");
@@ -49,5 +49,27 @@ public class Sudoku {
             System.exit(1);
             e.printStackTrace();
         }  
-    }
+     */
+
+        int[][] board = {
+          {5,3,4,6,7,8,9,1,2},
+{6,7,2,1,9,5,3,4,8},
+{1,9,8,3,4,2,5,6,7},
+{8,5,9,7,7,1,4,2,3},
+{4,2,6,8,5,3,7,9,1},
+{7,1,3,9,2,4,8,5,6},
+{9,6,1,5,3,7,2,8,4},
+{2,8,7,4,1,9,6,3,5},
+{3,4,5,2,8,6,1,7,9}
+};
+
+Game g = new Game(board);
+
+EnhancedValidator v = new EnhancedValidator();
+
+GameState state = v.validate(g);
+
+System.out.println(state); // INCOMPLETE
+
+}
 }
