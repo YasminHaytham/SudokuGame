@@ -16,13 +16,9 @@ public class GameStorage {
     private Path FullCurrentGamePath;
     private Path CurrentGameName;
 
-    public GameStorage() {
-        baseDir = null;
-        this.fileManager = new FileManager();
-    }
 
-    public GameStorage(String baseDir) {
-        this.baseDir = Paths.get(baseDir);
+    public GameStorage() {
+        this.baseDir = Paths.get("games");
         this.fileManager = new FileManager();
         verifyDirectory(this.baseDir);
 
@@ -42,8 +38,6 @@ public class GameStorage {
 
     public Game loadSolvedBoard(Path filePath) throws IOException {
         int[][] board = fileManager.readBoard(filePath);
-        this.baseDir = filePath.getParent();
-        verifyDirectory(filePath);
         return new Game(board);
     }
 

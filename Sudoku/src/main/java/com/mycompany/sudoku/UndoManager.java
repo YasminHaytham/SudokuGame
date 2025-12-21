@@ -1,18 +1,21 @@
 package com.mycompany.sudoku;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 public class UndoManager {
     private final Path logFilePath;
-    private final Game game;
     private final Stack<UserAction> undoStack;
     
-    public UndoManager(Game game, String gameFolderPath) {
-        this.game = game;
+    public UndoManager( String gameFolderPath) {
         this.undoStack = new Stack<>();
         
         Path incompletePath = Paths.get(gameFolderPath, "incomplete");
@@ -44,7 +47,7 @@ public class UndoManager {
         return !undoStack.isEmpty();
     }
     
-    public void undo() throws IOException {
+    public void undo( Game game) throws IOException {
         if (!canUndo()) {
             throw new IllegalStateException("No actions to undo");
         }

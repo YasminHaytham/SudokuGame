@@ -3,19 +3,15 @@ package com.mycompany.sudoku;
 import java.nio.file.Path;
 import java.util.List;
 
-public class Catalogue {
+public class Catalog {
     private Path baseDir;
-    private boolean unfinishedGame;
-    private boolean easyMediumHard;
+    private boolean hasunfinishedGame;
+    private boolean hasEasyMediumHard;
 
-    public Catalogue() {
+    public Catalog() {
         this.baseDir = Path.of("games");
-        this.unfinishedGame = false;
-        this.easyMediumHard = false;
-    }
-
-    public void setPath (String newBaseDir) {
-        this.baseDir = Path.of(newBaseDir);
+        this.hasunfinishedGame = false;
+        this.hasEasyMediumHard = false;
     }
 
     public boolean[] checkGames(){
@@ -25,24 +21,20 @@ public class Catalogue {
          List<Path> mediumGames = storageFileManager.listFiles(baseDir.resolve("medium"));
           List<Path> hardGames = storageFileManager.listFiles(baseDir.resolve("hard"));
         if (unfinishedGames != null && !unfinishedGames.isEmpty()) {
-            this.unfinishedGame = true;
+            this.hasunfinishedGame = true;
         } else {
-            this.unfinishedGame = false;
+            this.hasunfinishedGame = false;
         }
         if ((easyGames != null && !easyGames.isEmpty()) &&
             (mediumGames != null && !mediumGames.isEmpty()) &&
             (hardGames != null && !hardGames.isEmpty())) {
-            this.easyMediumHard = true;
+            this.hasEasyMediumHard = true;
         } else {
-            this.easyMediumHard = false;
+            this.hasEasyMediumHard = false;
         }
-        return new boolean[]{unfinishedGame, easyMediumHard};
+        return new boolean[]{hasunfinishedGame, hasEasyMediumHard};
     }
    
-
-
-
-
 
 
 }
