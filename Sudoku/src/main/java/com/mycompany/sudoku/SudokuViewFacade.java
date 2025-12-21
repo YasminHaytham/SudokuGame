@@ -11,6 +11,11 @@ public class SudokuViewFacade implements Controllable{
     }
 
     @Override
+    public void startNewGame() throws IOException {
+        controller.abandonCurrentGame();
+    }
+
+    @Override
     public boolean[] getCatalog() {
         Catalog catalog = controller.getCatalog();
         return new boolean[]{catalog.checkGames()[0], catalog.checkGames()[1]};
@@ -88,6 +93,8 @@ public class SudokuViewFacade implements Controllable{
 
         return result;
     }
+
+
 
     @Override
     public void logUserAction(UserAction userAction) throws IOException {

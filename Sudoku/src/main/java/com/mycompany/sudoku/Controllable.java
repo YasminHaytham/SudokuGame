@@ -13,5 +13,6 @@ boolean[][] verifyGame(int[][] game);
 int[][] solveGame(int[][] game) throws InvalidGameException;
 // Logs the user action
 void logUserAction(UserAction userAction) throws IOException;
+public void startNewGame() throws IOException ;
 }
 
