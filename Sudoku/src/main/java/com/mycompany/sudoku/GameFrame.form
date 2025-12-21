@@ -23,13 +23,234 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="400" max="32767" attributes="0"/>
+          <Group type="102" alignment="1" attributes="0">
+              <Component id="jPanel1" pref="694" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="84" max="-2" attributes="0"/>
+              <Component id="VerifyButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="152" max="-2" attributes="0"/>
+              <Component id="SolveButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
+              <Component id="UndoButton" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="65" max="-2" attributes="0"/>
+          </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="300" max="32767" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
+              <Component id="jPanel1" min="-2" pref="426" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="VerifyButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="SolveButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="UndoButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="0" pref="36" max="32767" attributes="0"/>
+          </Group>
       </Group>
     </DimensionLayout>
   </Layout>
+  <SubComponents>
+    <Container class="javax.swing.JPanel" name="jPanel1">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+        <Property name="columns" type="int" value="9"/>
+        <Property name="rows" type="int" value="9"/>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JTextField" name="jTextField1">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField2">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField3">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField4">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField5">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField6">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField7">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField8">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField9">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField10">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField11">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField12">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField13">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField14">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField15">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField16">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField17">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField18">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField19">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField20">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField21">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField22">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField23">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField24">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField25">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField26">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField27">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField28">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField29">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField30">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField31">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField32">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField33">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField34">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField35">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField36">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField37">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField38">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField39">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField40">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField41">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField42">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField43">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField44">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField45">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField46">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField47">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField48">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField49">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField50">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField51">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField52">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField53">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField54">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField55">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField56">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField57">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField58">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField59">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField60">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField61">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField62">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField63">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField64">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField65">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField66">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField67">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField68">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField69">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField70">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField71">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField72">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField73">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField74">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField75">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField76">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField77">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField78">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField79">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField80">
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextField81">
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextField81ActionPerformed"/>
+          </Events>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JButton" name="VerifyButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Verify"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="VerifyButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="SolveButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Solve"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SolveButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="UndoButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Undo"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="UndoButtonActionPerformed"/>
+      </Events>
+    </Component>
+  </SubComponents>
 </Form>

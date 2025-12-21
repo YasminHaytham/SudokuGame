@@ -58,10 +58,10 @@ SudokuController controller = new SudokuController();
     }// </editor-fold>//GEN-END:initComponents
 
     private void newButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newButtonActionPerformed
-        
-       boolean [] catalogStatus = viewer.getCatalog();
-       
-       // delete unfinished if exists
+
+        boolean[] catalogStatus = viewer.getCatalog();
+
+        // delete unfinished if exists
         if (catalogStatus[0]) {
             try {
                 int[][] board = viewer.getGame('I');
