@@ -3,10 +3,8 @@ package com.mycompany.sudoku;
 import javax.swing.JOptionPane;
 
 public class SudokuGUI extends javax.swing.JFrame {
-
-    SudokuController controller = new SudokuController();
-    SudokuViewFacade viewer = new SudokuViewFacade(controller);
-
+SudokuController controller = new SudokuController();
+        SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     public SudokuGUI() {
         initComponents();
 
