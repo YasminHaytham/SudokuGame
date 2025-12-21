@@ -3,7 +3,8 @@ package com.mycompany.sudoku;
 import javax.swing.*;
 
 public class DifficultyFrame extends javax.swing.JFrame {
-
+    SudokuController controller = new SudokuController();
+        SudokuViewFacade viewer = new SudokuViewFacade(controller);
     public DifficultyFrame() {
         initComponents();
     }
@@ -79,8 +80,7 @@ public class DifficultyFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_hardButtonActionPerformed
     private void loadGame(char level) {
         try {
-            SudokuController controller = SudokuController.getInstance();
-            int[][] board = controller.getGame(level);
+            int[][] board = viewer.getGame(level);
             new GameFrame(board, String.valueOf(level)).setVisible(true);
             this.dispose();
         } catch (Exception e) {
