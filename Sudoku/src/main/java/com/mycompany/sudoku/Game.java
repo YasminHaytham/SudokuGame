@@ -1,5 +1,8 @@
 package com.mycompany.sudoku;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Game {
 
     private int [][] board;
@@ -54,5 +57,25 @@ public class Game {
 
     public int getCell(int row, int col) {
         return board[row][col];
+    }
+    public int[][] getEmptyCellPositions() {
+        List<int[]> positions = new ArrayList<>();
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (board[r][c] == 0) {
+                    positions.add(new int[]{r, c});
+                }
+            }
+        }
+        return positions.toArray(new int[0][]);
+    }
+    
+    // NEW METHOD: Get copy of board (needed by flyweight)
+    public int[][] getBoardCopy() {
+        int[][] copy = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            System.arraycopy(board[i], 0, copy[i], 0, 9);
+        }
+        return copy;
     }
 }
