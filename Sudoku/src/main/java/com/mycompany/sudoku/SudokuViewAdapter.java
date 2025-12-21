@@ -3,10 +3,10 @@ package com.mycompany.sudoku;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class SudokuViewFacade implements Controllable{
+public class SudokuViewAdapter implements Controllable{
     private final Viewable controller;
     
-    public SudokuViewFacade(Viewable controller) {
+    public SudokuViewAdapter(Viewable controller) {
         this.controller = controller;
     }
 

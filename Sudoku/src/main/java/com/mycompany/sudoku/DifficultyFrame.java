@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class DifficultyFrame extends javax.swing.JFrame {
     SudokuController controller = new SudokuController();
-        SudokuViewFacade viewer = new SudokuViewFacade(controller);
+        SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     public DifficultyFrame() {
         initComponents();
     }
