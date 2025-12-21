@@ -1,11 +1,14 @@
 package com.mycompany.sudoku;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 public class GameGenerator {
     private RandomPairs randomPairs;
     private EnhancedValidator validator;
+    private GameStorage storage;
     private static final int EASY_CELLS_Remove = 10;
     private static final int MEDIUM_CELLS_Remove = 20;
     private static final int HARD_CELLS_Remove = 25;
@@ -13,13 +16,20 @@ public class GameGenerator {
     public GameGenerator() {
         this.randomPairs = new RandomPairs();
         this.validator = new EnhancedValidator();
+        this.storage = new GameStorage("games");
     }
 
-    public Map<DifficultyEnum, Game> generateAll(Game SourceGame) throws  SolutionInvalidException
+    public boolean verifySolution(Game game) {
+        GameState state = validator.validate(game);
+        return state == GameState.VALID;
+    }
+
+    public boolean  generateFromSolved(Path sourceGamePath) throws  SolutionInvalidException, IOException
     {
-        GameState state = validator.validate(SourceGame);
-        if ( state != GameState.VALID) {
-            throw new SolutionInvalidException("Source Solution is  " + state);
+        try{
+        Game SourceGame= storage.loadSolvedBoard(sourceGamePath);
+        if (!verifySolution(SourceGame)) {
+            throw new SolutionInvalidException("Source Solution is Invaild/Incomplet");
         }
         else 
         {
@@ -27,9 +37,20 @@ public class GameGenerator {
             games.put(DifficultyEnum.EASY, removeCells(SourceGame, EASY_CELLS_Remove));
             games.put(DifficultyEnum.MEDIUM, removeCells(SourceGame, MEDIUM_CELLS_Remove));
             games.put(DifficultyEnum.HARD, removeCells(SourceGame, HARD_CELLS_Remove));
-            return games;
-        
+           boolean easySaved = storage.saveGame(DifficultyEnum.EASY, games.get(DifficultyEnum.EASY)); 
+           boolean mediumSaved = storage.saveGame(DifficultyEnum.MEDIUM, games.get(DifficultyEnum.MEDIUM));
+            boolean hardSaved = storage.saveGame(DifficultyEnum.HARD, games.get(DifficultyEnum.HARD));
+            if (easySaved && mediumSaved && hardSaved) {
+                return true;
+            } else {
+                return false;
+            }
         }
+        }
+        catch (IOException e) {
+            throw new IOException("Error loading source game from file: " + sourceGamePath.toString(), e);
+        }
+       
 
     }
 

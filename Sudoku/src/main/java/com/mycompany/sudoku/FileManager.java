@@ -26,7 +26,7 @@ public class FileManager {
         return Board;
     }
 
-    void writeBoard(Path file, int[][] board)
+    void writeBoard(Path file, int[][] board) throws IOException
     {
         List<String> lines = new ArrayList<>();
         for (int r = 0; r < 9; r++) {
@@ -39,11 +39,8 @@ public class FileManager {
             }
             lines.add(line.toString());
         }
-        try {
             Files.write(file, lines);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        
     }
 
     List<Path> listFiles(Path folder)
@@ -57,7 +54,7 @@ public class FileManager {
         return fileList;
     }
 
-    void delete(Path file) throws IOException
+    void deleteFile(Path file) throws IOException
     {
          if (Files.exists(file)) {
             Files.delete(file);

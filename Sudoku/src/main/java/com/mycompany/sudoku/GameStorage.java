@@ -1,101 +1,163 @@
 package com.mycompany.sudoku;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Random;
 
 public class GameStorage {
-    private final Path baseDir;
-    private final FileManager fileManager;
+
+    private Path baseDir;
+    private FileManager fileManager;
     private Path FullCurrentGamePath;
     private Path CurrentGameName;
+
+    public GameStorage() {
+        baseDir = null;
+        this.fileManager = new FileManager();
+    }
 
     public GameStorage(String baseDir) {
         this.baseDir = Paths.get(baseDir);
         this.fileManager = new FileManager();
-        this.CurrentGameName = null;
-        this.FullCurrentGamePath = null;
+        verifyDirectory(this.baseDir);
+
+    }
+
+    public void verifyDirectory(Path dirPath) {
+        try {
+            Files.createDirectories(this.baseDir);
+            Files.createDirectories(this.baseDir.resolve("easy"));
+            Files.createDirectories(this.baseDir.resolve("medium"));
+            Files.createDirectories(this.baseDir.resolve("hard"));
+            Files.createDirectories(this.baseDir.resolve("incomplete"));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create storage folders", e);
+        }
+    }
+
+    public Game loadSolvedBoard(Path filePath) throws IOException {
+        int[][] board = fileManager.readBoard(filePath);
+        this.baseDir = filePath.getParent();
+        verifyDirectory(filePath);
+        return new Game(board);
     }
 
     // for diff dificulties 
-    public void saveGame (Game game , DifficultyEnum difficulty)
-    {
-        String filename = difficulty.toString().toLowerCase() + "_" + new Random().nextInt(1000) + ".txt";
-        Path filePath = baseDir.resolve(difficulty.toString().toLowerCase()).resolve(filename);
+    public boolean saveGame(DifficultyEnum difficulty, Game game) {
+        String filename = difficulty.toString().toLowerCase() + "_" + System.currentTimeMillis() + ".sdk";
+        Path folder = baseDir.resolve(difficulty.toString().toLowerCase());
+        Path filePath = folder.resolve(filename);
+        try {
         fileManager.writeBoard(filePath, game.getBoard());
+        }
+        catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
-    public Game loadRandomGame (DifficultyEnum difficulty) throws NotFoundException
-    {
+    public Game readGame(DifficultyEnum difficulty) throws NotFoundException {
         Path dirPath = baseDir.resolve(difficulty.toString().toLowerCase());
-        try{
-            List<Path> files = fileManager.listFiles(dirPath);
-            if ( files.isEmpty()) {
-                throw new NotFoundException("No Games Found For difficulty " + difficulty);
-            }
-            Path randomFile = files.get( new Random().nextInt(files.size()));
-            CurrentGameName = randomFile.getFileName();
-            FullCurrentGamePath = randomFile;
-            int [][] board = fileManager.readBoard(randomFile);
-            return new Game(board);
+        List<Path> files = fileManager.listFiles(dirPath);
+        if (files.isEmpty() || files == null) {
+            throw new NotFoundException("No Games Found For difficulty " + difficulty);
         }
-        catch (Exception e) {
+        try {
+            Random rand = new Random();
+            Path randomFile = files.get(rand.nextInt(files.size()));
+            this.CurrentGameName = randomFile.getFileName();
+            int[][] board = fileManager.readBoard(randomFile);
+            Path incompleteDir = baseDir.resolve("incomplete");
+            Path gameFile = incompleteDir.resolve(CurrentGameName);
+            Path logFile = incompleteDir.resolve("log.txt");
+            Files.copy(randomFile, gameFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.deleteIfExists(logFile);
+            Files.createFile(logFile);
+            return new Game(board);
+        } catch (Exception e) {
             throw new NotFoundException("Failed to Load Game For difficulty " + difficulty);
-        }   
+        }
+
     }
 
-    public void deleteGame()
-    {
-        if ( FullCurrentGamePath != null) {
-            try {
-                Files.delete(FullCurrentGamePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            FullCurrentGamePath = null;
-            CurrentGameName = null;
+    public boolean deleteGameFromFolder(DifficultyEnum difficulty) {
+        Path dirPath = baseDir.resolve(difficulty.toString().toLowerCase());
+        Path filePath = dirPath.resolve(CurrentGameName);
+        try {
+            fileManager.deleteFile(filePath);
+        } catch (IOException e) {
+            return false;
         }
-        
+        return true;
     }
 
     // for current game
-    public void saveCurrentGame (Game game ) throws IOException
-    {
+    public boolean saveCurrentGame(Game game) throws IOException {
         Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
         Path logFile = baseDir.resolve("incomplete").resolve("log.txt");
-        fileManager.writeBoard( gameFile, game.getBoard());
-        if (!Files.exists(logFile)) {
-            Files.write(logFile, new byte[0]);
-
-    }
-}
-
-    public Game loadCurrentGame () throws NotFoundException
-    {
-        if ( FullCurrentGamePath == null) {
-            throw new NotFoundException("No Incomplete Game Found ");
-        }
+         // Append to log file
         try{
-            int [][] board = fileManager.readBoard(FullCurrentGamePath);
-            return new Game(board);
+        fileManager.writeBoard(gameFile, game.getBoard());
         }
-        catch (Exception e) {
-            throw new NotFoundException("Failed to Load Incomplete Game " + CurrentGameName);
-        }   
+        catch (IOException e) {
+            return false;
+        }
+        return true;
+       
+    }
+    public boolean updateGameInFolder(DifficultyEnum difficulty, Game game) {
+        Path dirPath = baseDir.resolve(difficulty.toString().toLowerCase());
+        Path filePath = dirPath.resolve(CurrentGameName);
+        try {
+            fileManager.writeBoard(filePath, game.getBoard());
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
-    public void deleteCurrentGame()
-    {
-        Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
+    public Game ReadCurrentGame() throws NotFoundException {
+        Path incompleteDir = baseDir.resolve("incomplete");
+        File dir = incompleteDir.toFile();
+        File[] files = dir.listFiles();
+
+        File sdkFile = null;
+        for (File file : files) {
+            if (file.isFile()) {
+                String name = file.getName().toLowerCase();
+                if (name.endsWith(".sdk")) {
+                    sdkFile = file;
+                    break;
+                }
+            }
+        }
+        Path gameFile = incompleteDir.resolve(sdkFile.getName());
         try {
-            Files.delete(gameFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        FullCurrentGamePath = null;
-        CurrentGameName = null;
+            FullCurrentGamePath = gameFile;
+            this.CurrentGameName = gameFile.getFileName();
+            int[][] board = fileManager.readBoard(FullCurrentGamePath);
+            return new Game(board);
+        } catch (Exception e) {
+            throw new NotFoundException("Failed to Load Incomplete Game " + CurrentGameName);
+        }
     }
-}
+
+    public boolean deleteCurrentGame() {
+        Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
+        Path logFile = baseDir.resolve("incomplete").resolve("log.txt");
+        try {
+            fileManager.deleteFile(gameFile);
+            fileManager.deleteFile(logFile);
+            FullCurrentGamePath = null;
+            CurrentGameName = null;
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
 }
