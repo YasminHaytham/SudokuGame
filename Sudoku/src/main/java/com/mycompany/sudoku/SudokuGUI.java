@@ -1,9 +1,10 @@
 package com.mycompany.sudoku;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 
 public class SudokuGUI extends javax.swing.JFrame {
-
+SudokuController controller = new SudokuController();
+        SudokuViewFacade viewer = new SudokuViewFacade(controller);
     public SudokuGUI() {
         initComponents();
 
@@ -57,18 +58,19 @@ public class SudokuGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void newButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newButtonActionPerformed
-        SudokuController controller = SudokuController.getInstance();
-        Catalog catalog = controller.getCatalog();
-
-        if (catalog.hasUnfinishedGame) {
+        
+       boolean [] catalogStatus = viewer.getCatalog();
+       
+       // delete unfinished if exists
+        if (catalogStatus[0]) {
             try {
-                int[][] board = controller.getGame('I');
+                int[][] board = viewer.getGame('I');
                 new GameFrame(board, "INCOMPLETE").setVisible(true);
                 this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "No incomplete game found");
             }
-        } else if (catalog.hasAllDifficulties) {
+        } else if (catalogStatus[1]) {
             new DifficultyFrame().setVisible(true);
             this.dispose();
         } else {
@@ -79,8 +81,7 @@ public class SudokuGUI extends javax.swing.JFrame {
 
     private void incompleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_incompleteButtonActionPerformed
         try {
-            SudokuController controller = SudokuController.getInstance();
-            int[][] board = controller.getGame('I');
+            int[][] board = viewer.getGame('I');
             new GameFrame(board, "INCOMPLETE").setVisible(true);
             this.dispose();
         } catch (Exception e) {

@@ -29,6 +29,9 @@ public class SudokuViewFacade implements Controllable{
             case 'H':
                 difficulty = DifficultyEnum.HARD;
                 break;
+            case 'I':
+                difficulty = null; 
+                break;
             default:
                 throw new IllegalArgumentException("Invalid level: " + level);
         }

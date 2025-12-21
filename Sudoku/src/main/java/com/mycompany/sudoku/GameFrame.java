@@ -9,11 +9,15 @@ package com.mycompany.sudoku;
  * @author MEGA
  */
 public class GameFrame extends javax.swing.JFrame {
+    private int[][] board;
+    private String gameType;
 
     /**
      * Creates new form GameFrame
      */
-    public GameFrame() {
+    public GameFrame(int[][] board, String gameType) {
+        this.board = board;
+        this.gameType = gameType;
         initComponents();
     }
 
@@ -72,7 +76,7 @@ public class GameFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GameFrame().setVisible(true);
+                new GameFrame(null,null).setVisible(true);
             }
         });
     }

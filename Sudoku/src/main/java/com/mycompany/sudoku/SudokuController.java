@@ -30,7 +30,11 @@ public class SudokuController implements Viewable {
 
     @Override
      public Game getGame(DifficultyEnum level) throws NotFoundException {
+        if (level == null) {
+                return storage.ReadCurrentGame();
+        }
         return storage.readGame(level);
+
     }
     @Override
    public void driveGames(Game sourceGame) throws SolutionInvalidException, IOException {
