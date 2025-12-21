@@ -1,10 +1,14 @@
 package com.mycompany.sudoku;
 
-import javax.swing.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class DifficultyFrame extends javax.swing.JFrame {
+
     SudokuController controller = new SudokuController();
-        SudokuViewFacade viewer = new SudokuViewFacade(controller);
+    SudokuViewFacade viewer = new SudokuViewFacade(controller);
+
     public DifficultyFrame() {
         initComponents();
     }
@@ -68,25 +72,29 @@ public class DifficultyFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void meduimButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_meduimButtonActionPerformed
-        loadGame('M');
+        try {
+            viewer.getGame('M');
+        } catch (NotFoundException ex) {
+            Logger.getLogger(DifficultyFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_meduimButtonActionPerformed
 
     private void EasyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EasyButtonActionPerformed
-        loadGame('E');
+        try {
+            viewer.getGame('E');
+        } catch (NotFoundException ex) {
+            Logger.getLogger(DifficultyFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_EasyButtonActionPerformed
 
     private void hardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hardButtonActionPerformed
-        loadGame('H');
-    }//GEN-LAST:event_hardButtonActionPerformed
-    private void loadGame(char level) {
-        try {
-            int[][] board = viewer.getGame(level);
-            new GameFrame(board, String.valueOf(level)).setVisible(true);
-            this.dispose();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Game not found");
+       try {
+            viewer.getGame('H');
+        } catch (NotFoundException ex) {
+            Logger.getLogger(DifficultyFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+    }//GEN-LAST:event_hardButtonActionPerformed
+ 
 
     public static void main(String args[]) {
 

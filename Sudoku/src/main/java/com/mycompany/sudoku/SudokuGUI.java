@@ -3,8 +3,10 @@ package com.mycompany.sudoku;
 import javax.swing.JOptionPane;
 
 public class SudokuGUI extends javax.swing.JFrame {
-SudokuController controller = new SudokuController();
-        SudokuViewFacade viewer = new SudokuViewFacade(controller);
+
+    SudokuController controller = new SudokuController();
+    SudokuViewFacade viewer = new SudokuViewFacade(controller);
+
     public SudokuGUI() {
         initComponents();
 
@@ -58,10 +60,10 @@ SudokuController controller = new SudokuController();
     }// </editor-fold>//GEN-END:initComponents
 
     private void newButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newButtonActionPerformed
-        
-       boolean [] catalogStatus = viewer.getCatalog();
-       
-       // delete unfinished if exists
+
+        boolean[] catalogStatus = viewer.getCatalog();
+
+        // delete unfinished if exists
         if (catalogStatus[0]) {
             try {
                 int[][] board = viewer.getGame('I');
