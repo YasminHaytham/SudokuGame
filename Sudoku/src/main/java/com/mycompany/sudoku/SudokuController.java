@@ -22,7 +22,7 @@ public class SudokuController implements Viewable {
     public String verifyGame(Game game) {
         return validator.verifyGame(game);
     }
-    // other methods can be added here as needed
+    
     @Override
     public Catalog getCatalog() {
         return catalog;
