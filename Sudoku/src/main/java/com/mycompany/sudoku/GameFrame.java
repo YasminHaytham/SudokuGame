@@ -1,20 +1,103 @@
 package com.mycompany.sudoku;
 
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class GameFrame extends javax.swing.JFrame {
+
     SudokuController controller = new SudokuController();
     SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
-    
     private int[][] board;
 
-    
     public GameFrame(int[][] board) {
         this.board = board;
         initComponents();
+        attachAutoSaveAll();
+        updateBoardUI();
     }
+
+    private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
+        UserAction action = new UserAction(x, y, oldValue, newValue);
+        try {
+            controller.logUserAction(action.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void attachAutoSave(JTextField textField, int x, int y) {
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            private String previousValue = textField.getText();
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                saveChange();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                saveChange();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                saveChange();
+            }
+
+            private void saveChange() {
+                try {
+                    String newText = textField.getText();
+                    int newValue = newText.isEmpty() ? 0 : Integer.parseInt(newText);
+                    int oldValue = previousValue.isEmpty() ? 0 : Integer.parseInt(previousValue);
+
+                    board[x][y] = newValue;
+
+                    logUserActionForCell(x, y, oldValue, newValue);
+
+                    previousValue = newText;
+                } catch (NumberFormatException ex) {
+                    textField.setText(previousValue);
+                }
+            }
+        });
+    }
+
+    private void attachAutoSaveAll() {
+        for (int i = 1; i <= 81; i++) {
+            try {
+                Field f = GameFrame.class.getDeclaredField("jTextField" + i);
+                f.setAccessible(true);
+                JTextField tf = (JTextField) f.get(this);
+                int row = (i - 1) / 9;
+                int col = (i - 1) % 9;
+                attachAutoSave(tf, row, col);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void updateBoardUI() {
+        for (int i = 1; i <= 81; i++) {
+            try {
+                Field f = GameFrame.class.getDeclaredField("jTextField" + i);
+                f.setAccessible(true);
+                JTextField tf = (JTextField) f.get(this);
+                int row = (i - 1) / 9;
+                int col = (i - 1) % 9;
+                tf.setText(board[row][col] == 0 ? "" : String.valueOf(board[row][col]));
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -104,6 +187,7 @@ public class GameFrame extends javax.swing.JFrame {
         VerifyButton = new javax.swing.JButton();
         SolveButton = new javax.swing.JButton();
         UndoButton = new javax.swing.JButton();
+        backButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -217,6 +301,13 @@ public class GameFrame extends javax.swing.JFrame {
             }
         });
 
+        backButton.setText("Back to Menu");
+        backButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -232,6 +323,10 @@ public class GameFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(UndoButton)
                 .addGap(65, 65, 65))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(backButton)
+                .addGap(16, 16, 16))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -242,7 +337,9 @@ public class GameFrame extends javax.swing.JFrame {
                     .addComponent(VerifyButton)
                     .addComponent(SolveButton)
                     .addComponent(UndoButton))
-                .addGap(0, 36, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addComponent(backButton)
+                .addContainerGap())
         );
 
         pack();
@@ -253,7 +350,7 @@ public class GameFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField81ActionPerformed
 
     private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VerifyButtonActionPerformed
-     viewer.verifyGame(board);
+        viewer.verifyGame(board);
     }//GEN-LAST:event_VerifyButtonActionPerformed
 
     private void SolveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SolveButtonActionPerformed
@@ -265,25 +362,26 @@ public class GameFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SolveButtonActionPerformed
 
     private void UndoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UndoButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_UndoButtonActionPerformed
+        viewer.undoLastAction(board);
+     }//GEN-LAST:event_UndoButtonActionPerformed
 
-    
-    
+    private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+        SudokuGUI mainGUI = new SudokuGUI();
+        mainGUI.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_backButtonActionPerformed
+
     public static void main(String args[]) {
-       
-        
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new GameFrame(null).setVisible(true);
-            }
-        });
+
+        int[][] initialBoard = new int[9][9];
+        java.awt.EventQueue.invokeLater(() -> new GameFrame(initialBoard).setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton SolveButton;
     private javax.swing.JButton UndoButton;
     private javax.swing.JButton VerifyButton;
+    private javax.swing.JButton backButton;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
