@@ -3,6 +3,7 @@ package com.mycompany.sudoku;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -43,15 +44,30 @@ public class FileManager {
         
     }
 
-    List<Path> listFiles(Path folder)
-    {
+  public List<Path> listFiles(Path folder) {
         List<Path> fileList = new ArrayList<>();
+        
         try {
-            Files.list(folder).forEach(fileList::add);
+            // Check if folder exists
+            if (!Files.exists(folder)) {
+                return fileList;  // Return empty list, not null
+            }
+            
+            // List files with try-with-resources
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(folder)) {
+                for (Path entry : stream) {
+                    if (Files.isRegularFile(entry)) {
+                        fileList.add(entry);
+                    }
+                }
+            }
+            
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error listing files in " + folder + ": " + e.getMessage());
+            // Return empty list instead of null
         }
-        return fileList;
+        
+        return fileList;  // Never returns null
     }
 
     void deleteFile(Path file) throws IOException

@@ -3,6 +3,8 @@ package com.mycompany.sudoku;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import javax.swing.JOptionPane;
+
 public class SudokuViewAdapter implements Controllable{
     private final Viewable controller;
     
@@ -12,13 +14,19 @@ public class SudokuViewAdapter implements Controllable{
 
     @Override
     public void startNewGame() throws IOException {
-        controller.abandonCurrentGame();
+        try {
+            controller.abandonCurrentGame();
+        } catch (IOException | NotFoundException e) {
+           throw new IOException("Failed to abandon current game: " + e.getMessage());
+        }
     }
 
     @Override
     public boolean[] getCatalog() {
+        
         Catalog catalog = controller.getCatalog();
-        return new boolean[]{catalog.checkGames()[0], catalog.checkGames()[1]};
+        boolean[] status = catalog.checkGames();
+        return status;
     }
 
     @Override
@@ -51,32 +59,71 @@ public class SudokuViewAdapter implements Controllable{
         controller.driveGames(Sourcegame);
     }
 
-    @Override
-     public boolean[][] verifyGame(int[][] game) {
+@Override
+public boolean[][] verifyGame(int[][] game) {
+    Game g = new Game(game);
+    String result = controller.verifyGame(g);
 
-        Game g = new Game(game);
-        String result = controller.verifyGame(g);
+    boolean[][] validity = new boolean[9][9];
 
-        boolean[][] validity = new boolean[9][9];
-
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                validity[i][j] = true;
-            }
+    // Initialize all cells as valid
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            validity[i][j] = true;
         }
+    }
 
-        if (result.startsWith("invalid")) {
+    // Check what type of result we got
+    System.out.println("DEBUG: Verification result: " + result);
+    
+    if (result == null || result.equals("incomplete")) {
+        // For incomplete boards, return all true (no highlights)
+        return validity;
+        
+    } else if (result.startsWith("invalid")) {
+        // Parse invalid cells
+        try {
+            // The format is "invalid x1,y1 x2,y2 ..."
             String[] parts = result.substring(7).trim().split(" ");
             for (String p : parts) {
-                String[] xy = p.split(",");
-                int x = Integer.parseInt(xy[0]);
-                int y = Integer.parseInt(xy[1]);
-                validity[x][y] = false;
+                if (!p.isEmpty()) {
+                    String[] xy = p.split(",");
+                    int x = Integer.parseInt(xy[0]);
+                    int y = Integer.parseInt(xy[1]);
+                    validity[x][y] = false;
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error parsing invalid cells: " + e.getMessage());
         }
-
+        return validity;
+        
+    } else if (result.equals("Complete but invalid")) {
+        // For complete but invalid boards, we should highlight errors
+        // But we need the actual invalid positions
+        // Let's use the validator directly
+        try {
+            EnhancedValidator validator = new EnhancedValidator();
+            String validationResult = validator.verifyGame(g);
+            if (validationResult.startsWith("invalid")) {
+                String[] parts = validationResult.substring(7).trim().split(" ");
+                for (String p : parts) {
+                    String[] xy = p.split(",");
+                    int x = Integer.parseInt(xy[0]);
+                    int y = Integer.parseInt(xy[1]);
+                    validity[x][y] = false;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error validating complete board: " + e.getMessage());
+        }
+        return validity;
+        
+    } else {
+        // For "valid - congratulations!" or any other valid result
         return validity;
     }
+}
 
     @Override
     public int[][] solveGame(int[][] game) throws InvalidGameException {
@@ -93,10 +140,10 @@ public class SudokuViewAdapter implements Controllable{
 
         return result;
     }
-
     @Override
-    public void undoLastAction() throws IOException {
-        controller.undoLastAction();
+    public int[][] undoLastAction() throws IOException {
+        Game game = controller.undoLastAction();  
+        return game.getBoard();
     }
 
     @Override
