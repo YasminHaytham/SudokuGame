@@ -15,13 +15,13 @@ public class GameFrame extends javax.swing.JFrame {
     SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     private int[][] board;
 
-    
     public GameFrame(int[][] board) {
         this.board = board;
         initComponents();
         attachAutoSaveAll();
         updateBoardUI();
     }
+
     private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
         UserAction action = new UserAction(x, y, oldValue, newValue);
         try {
@@ -30,6 +30,7 @@ public class GameFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
+
     private void attachAutoSave(JTextField textField, int x, int y) {
         textField.getDocument().addDocumentListener(new DocumentListener() {
             private String previousValue = textField.getText();
@@ -57,7 +58,6 @@ public class GameFrame extends javax.swing.JFrame {
 
                     board[x][y] = newValue;
 
-                   
                     logUserActionForCell(x, y, oldValue, newValue);
 
                     previousValue = newText;
@@ -187,6 +187,7 @@ public class GameFrame extends javax.swing.JFrame {
         VerifyButton = new javax.swing.JButton();
         SolveButton = new javax.swing.JButton();
         UndoButton = new javax.swing.JButton();
+        backButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -300,6 +301,13 @@ public class GameFrame extends javax.swing.JFrame {
             }
         });
 
+        backButton.setText("Back to Menu");
+        backButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -315,6 +323,10 @@ public class GameFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(UndoButton)
                 .addGap(65, 65, 65))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(backButton)
+                .addGap(16, 16, 16))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -325,7 +337,9 @@ public class GameFrame extends javax.swing.JFrame {
                     .addComponent(VerifyButton)
                     .addComponent(SolveButton)
                     .addComponent(UndoButton))
-                .addGap(0, 36, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addComponent(backButton)
+                .addContainerGap())
         );
 
         pack();
@@ -351,9 +365,15 @@ public class GameFrame extends javax.swing.JFrame {
         viewer.undoLastAction(board);
      }//GEN-LAST:event_UndoButtonActionPerformed
 
+    private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+        SudokuGUI mainGUI = new SudokuGUI();
+        mainGUI.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_backButtonActionPerformed
+
     public static void main(String args[]) {
 
-      int[][] initialBoard = new int[9][9];
+        int[][] initialBoard = new int[9][9];
         java.awt.EventQueue.invokeLater(() -> new GameFrame(initialBoard).setVisible(true));
     }
 
@@ -361,6 +381,7 @@ public class GameFrame extends javax.swing.JFrame {
     private javax.swing.JButton SolveButton;
     private javax.swing.JButton UndoButton;
     private javax.swing.JButton VerifyButton;
+    private javax.swing.JButton backButton;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
