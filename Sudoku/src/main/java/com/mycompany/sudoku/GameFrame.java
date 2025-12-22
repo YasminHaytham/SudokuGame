@@ -6,15 +6,13 @@ import java.util.logging.Logger;
 
 public class GameFrame extends javax.swing.JFrame {
     SudokuController controller = new SudokuController();
-    SudokuViewFacade viewer = new SudokuViewFacade(controller);
+    SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     
     private int[][] board;
-    private String gameType;
 
     
-    public GameFrame(int[][] board, String gameType) {
+    public GameFrame(int[][] board) {
         this.board = board;
-        this.gameType = gameType;
         initComponents();
     }
     @SuppressWarnings("unchecked")
@@ -277,7 +275,7 @@ public class GameFrame extends javax.swing.JFrame {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GameFrame(null,null).setVisible(true);
+                new GameFrame(null).setVisible(true);
             }
         });
     }
