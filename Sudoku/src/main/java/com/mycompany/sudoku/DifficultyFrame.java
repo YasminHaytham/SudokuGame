@@ -72,7 +72,8 @@ public class DifficultyFrame extends javax.swing.JFrame {
 
     private void meduimButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_meduimButtonActionPerformed
         try {
-            viewer.getGame('M');
+            int[][] board = viewer.getGame('M');
+            new GameFrame(board).setVisible(true);
         } catch (NotFoundException ex) {
             Logger.getLogger(DifficultyFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -80,7 +81,8 @@ public class DifficultyFrame extends javax.swing.JFrame {
 
     private void EasyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EasyButtonActionPerformed
         try {
-            viewer.getGame('E');
+            int[][] board = viewer.getGame('E');
+            new GameFrame(board).setVisible(true);
         } catch (NotFoundException ex) {
             Logger.getLogger(DifficultyFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -88,7 +90,8 @@ public class DifficultyFrame extends javax.swing.JFrame {
 
     private void hardButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hardButtonActionPerformed
        try {
-            viewer.getGame('H');
+            int[][] board = viewer.getGame('H');
+            new GameFrame(board).setVisible(true);
         } catch (NotFoundException ex) {
             Logger.getLogger(DifficultyFrame.class.getName()).log(Level.SEVERE, null, ex);
         }

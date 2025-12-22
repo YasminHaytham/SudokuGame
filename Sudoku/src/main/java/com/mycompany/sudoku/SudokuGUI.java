@@ -61,19 +61,28 @@ SudokuController controller = new SudokuController();
 
         boolean[] catalogStatus = viewer.getCatalog();
 
-        // delete unfinished if exists
-        if (catalogStatus[0]) {
-            try {
-                int[][] board = viewer.getGame('I');
-                new GameFrame(board, "INCOMPLETE").setVisible(true);
-                this.dispose();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "No incomplete game found");
+         if (catalogStatus[1]) {
+            if (catalogStatus[0])
+            {
+                try{
+                viewer.startNewGame();
+                } catch (Exception e){
+                    JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage());
+                    return;
+                }
             }
-        } else if (catalogStatus[1]) {
             new DifficultyFrame().setVisible(true);
             this.dispose();
         } else {
+              if (catalogStatus[0])
+            {
+                try{
+                viewer.startNewGame();
+                } catch (Exception e){
+                    JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage());
+                    return;
+                }
+            }
             new LoadSolvedGameFrame().setVisible(true);
             this.dispose();
         }
@@ -82,7 +91,7 @@ SudokuController controller = new SudokuController();
     private void incompleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_incompleteButtonActionPerformed
         try {
             int[][] board = viewer.getGame('I');
-            new GameFrame(board, "INCOMPLETE").setVisible(true);
+            new GameFrame(board).setVisible(true);
             this.dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "No incomplete game found");

@@ -5,7 +5,7 @@ import java.awt.event.*;
 
 public class LoadSolvedGameFrame extends javax.swing.JFrame {
     SudokuController controller = new SudokuController();
-    SudokuViewFacade viewer = new SudokuViewFacade(controller);
+    SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
 
     public LoadSolvedGameFrame() {
         initComponents();
@@ -72,8 +72,7 @@ public class LoadSolvedGameFrame extends javax.swing.JFrame {
         jTextField1.setText(filePath);
 
         try {
-            SudokuViewFacade facade = new SudokuViewFacade(controller);
-            facade.driveGames(filePath);
+            viewer.driveGames(filePath);
 
             JOptionPane.showMessageDialog(this, "Games generated successfully!");
             new DifficultyFrame().setVisible(true);
