@@ -1,9 +1,9 @@
 package com.mycompany.sudoku;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,30 +45,31 @@ public class FileManager {
     }
 
   public List<Path> listFiles(Path folder) {
-        List<Path> fileList = new ArrayList<>();
-        
-        try {
-            // Check if folder exists
-            if (!Files.exists(folder)) {
-                return fileList;  // Return empty list, not null
-            }
-            
-            // List files with try-with-resources
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(folder)) {
-                for (Path entry : stream) {
-                    if (Files.isRegularFile(entry)) {
-                        fileList.add(entry);
-                    }
-                }
-            }
-            
-        } catch (IOException e) {
-            System.err.println("Error listing files in " + folder + ": " + e.getMessage());
-            // Return empty list instead of null
-        }
-        
-        return fileList;  // Never returns null
+    List<Path> fileList = new ArrayList<>();
+
+    if (folder == null) {
+        return fileList;
     }
+
+    File dir = folder.toFile();
+
+    if (!dir.exists() || !dir.isDirectory()) {
+        return fileList;
+    }
+
+    File[] files = dir.listFiles();
+    if (files == null) {
+        return fileList;
+    }
+
+    for (File file : files) {
+        if (file.isFile()) {
+            fileList.add(file.toPath());
+        }
+    }
+
+    return fileList;
+}
 
     void deleteFile(Path file) throws IOException
     {

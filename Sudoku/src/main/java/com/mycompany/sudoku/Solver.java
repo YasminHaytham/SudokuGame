@@ -15,7 +15,7 @@ public class Solver {
     public int[] solve() throws NoSolutionException {
         int[][] emptyPositions = game.getEmptyCellPositions();
         
-        // Double-check (safety)
+       
         if (emptyPositions.length != 5) {
             throw new IllegalStateException(
                 "Game reports " + game.getEmptyCells() + 
@@ -42,11 +42,11 @@ public class Solver {
     }
     
     private int[] createSolutionArray(int[][] positions, int[] values) {
-        int[] solution = new int[15]; // 5 cells × 3 (row, col, value)
+        int[] solution = new int[15]; 
         for (int i = 0; i < 5; i++) {
-            solution[i * 3] = positions[i][0];     // row
-            solution[i * 3 + 1] = positions[i][1]; // column  
-            solution[i * 3 + 2] = values[i];       // value
+            solution[i * 3] = positions[i][0];     
+            solution[i * 3 + 1] = positions[i][1]; 
+            solution[i * 3 + 2] = values[i];       
         }
         return solution;
     }

@@ -67,15 +67,15 @@ public class UndoManager {
         
         try {
             List<String> lines = Files.readAllLines(logFilePath);
-            undoStack.clear(); // Clear existing stack
-            undoStack.addAll(lines); // Load all log entries
+            undoStack.clear(); 
+            undoStack.addAll(lines);
         } catch (IOException e) {
             System.err.println("Warning: Could not load undo log: " + e.getMessage());
         }
     }
     
     public void logAction(int x, int y, int newValue, int previousValue) {
-        // Validate
+        
         if (x < 0 || x >= 9 || y < 0 || y >= 9) {
             throw new IllegalArgumentException("Invalid coordinates");
         }
@@ -83,8 +83,7 @@ public class UndoManager {
             throw new IllegalArgumentException("Values must be 0-9");
         }
         
-        // IMPORTANT: The order should be consistent
-        // When logging, we store: x,y,newValue,previousValue
+       
         String logEntry = x + "," + y + "," + newValue + "," + previousValue;
         
         undoStack.push(logEntry);
@@ -110,10 +109,10 @@ private void removeLastLineFromLog() throws IOException {
     if (!lines.isEmpty()) {
         lines.remove(lines.size() - 1);
         
-        // Write back using Files.write with appropriate options
+        
         Files.write(logFilePath, lines, StandardOpenOption.TRUNCATE_EXISTING);
     } else {
-        // If no lines left, delete the file
+        
         Files.deleteIfExists(logFilePath);
     }
 }
