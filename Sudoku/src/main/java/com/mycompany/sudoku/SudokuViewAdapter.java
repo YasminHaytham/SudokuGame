@@ -94,7 +94,10 @@ public class SudokuViewAdapter implements Controllable{
         return result;
     }
 
-    
+    @Override
+    public void undoLastAction() throws IOException {
+        controller.undoLastAction();
+    }
 
     @Override
     public void logUserAction(UserAction userAction) throws IOException {

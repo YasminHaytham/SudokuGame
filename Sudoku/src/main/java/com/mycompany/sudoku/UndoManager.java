@@ -11,20 +11,9 @@ import java.util.Stack;
 
 public class UndoManager {
     private final Path logFilePath;
-    private final Stack<String> undoStack; // Store STRINGS, not UserAction!
-    private Game currentGame;
+    private final Stack<String> undoStack;
     
-    public UndoManager(Game game, String gameFolderPath) {
-        this.currentGame = game;
-        this.undoStack = new Stack<>();
-        
-        Path incompletePath = Paths.get(gameFolderPath, "incomplete");
-        this.logFilePath = incompletePath.resolve("log.txt");
-        
-        loadExistingLog();
-    }
     public UndoManager( String gameFolderPath) {
-        this.currentGame = null;
         this.undoStack = new Stack<>();
         
         Path incompletePath = Paths.get(gameFolderPath, "incomplete");
@@ -51,7 +40,7 @@ public class UndoManager {
     }
     
     
-    private void parseAndApplyAction(String action, boolean undo) {
+    private void parseAndApplyAction(String action, boolean undo, Game currentGame) {
         String clean = action.replace("(", "").replace(")", "");
         String[] parts = clean.split(",");
         
@@ -76,13 +65,13 @@ public class UndoManager {
         return !undoStack.isEmpty();
     }
     
-    public void undo() throws IOException {
+    public void undo( Game game) throws IOException {
         if (!canUndo()) {
             throw new IllegalStateException("No actions to undo");
         }
         
         String lastAction = undoStack.pop();
-        parseAndApplyAction(lastAction, true);
+        parseAndApplyAction(lastAction, true , game);
         removeLastLineFromLog();
     }
     

@@ -10,5 +10,6 @@ String verifyGame(Game game);
 int[] solveGame(Game game) throws InvalidGameException;
 void logUserAction(String userAction) throws IOException;
 void abandonCurrentGame() throws IOException;
+ public void undoLastAction() throws IOException;
 // other methods can be added here as needed
 }
