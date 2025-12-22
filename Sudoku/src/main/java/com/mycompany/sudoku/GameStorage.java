@@ -93,8 +93,6 @@ public class GameStorage {
     // for current game
     public boolean saveCurrentGame(Game game) throws IOException {
         Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
-        Path logFile = baseDir.resolve("incomplete").resolve("log.txt");
-         // Append to log file
         try{
         fileManager.writeBoard(gameFile, game.getBoard());
         }
@@ -182,4 +180,12 @@ public class GameStorage {
         
         return null;
     }
+
+
+    public Game getCurrentGame() throws NotFoundException {
+        return ReadCurrentGame();
+    }
+      
+
+
 }
