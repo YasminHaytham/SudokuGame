@@ -348,7 +348,7 @@ public class GameFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SolveButtonActionPerformed
 
     private void UndoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UndoButtonActionPerformed
-        viewer.undoGame(board);
+        viewer.undoLastAction(board);
      }//GEN-LAST:event_UndoButtonActionPerformed
 
     public static void main(String args[]) {
