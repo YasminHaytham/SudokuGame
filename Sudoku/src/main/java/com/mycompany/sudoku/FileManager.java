@@ -1,6 +1,7 @@
 package com.mycompany.sudoku;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,16 +44,32 @@ public class FileManager {
         
     }
 
-    List<Path> listFiles(Path folder)
-    {
-        List<Path> fileList = new ArrayList<>();
-        try {
-            Files.list(folder).forEach(fileList::add);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+  public List<Path> listFiles(Path folder) {
+    List<Path> fileList = new ArrayList<>();
+
+    if (folder == null) {
         return fileList;
     }
+
+    File dir = folder.toFile();
+
+    if (!dir.exists() || !dir.isDirectory()) {
+        return fileList;
+    }
+
+    File[] files = dir.listFiles();
+    if (files == null) {
+        return fileList;
+    }
+
+    for (File file : files) {
+        if (file.isFile()) {
+            fileList.add(file.toPath());
+        }
+    }
+
+    return fileList;
+}
 
     void deleteFile(Path file) throws IOException
     {

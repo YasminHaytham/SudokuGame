@@ -1,0 +1,114 @@
+package com.mycompany.sudoku;
+
+import javax.swing.JOptionPane;
+
+public class SudokuGUI extends javax.swing.JFrame {
+SudokuController controller = new SudokuController();
+        SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
+    public SudokuGUI() {
+        initComponents();
+
+    }
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        newButton = new javax.swing.JButton();
+        incompleteButton = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        newButton.setText("NEW GAME");
+        newButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newButtonActionPerformed(evt);
+            }
+        });
+
+        incompleteButton.setText("COMPLETE GAME");
+        incompleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                incompleteButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(114, 114, 114)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(incompleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(newButton, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(118, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(110, Short.MAX_VALUE)
+                .addComponent(incompleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(39, 39, 39)
+                .addComponent(newButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(87, 87, 87))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void newButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newButtonActionPerformed
+
+        boolean[] catalogStatus = viewer.getCatalog();
+
+         if (catalogStatus[1]) {
+            if (catalogStatus[0])
+            {
+                try {
+                viewer.startNewGame();
+                } catch (Exception e){
+                    JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage());
+                    return;
+                }
+            }
+            new DifficultyFrame().setVisible(true);
+            this.dispose();
+        } else {
+              if (catalogStatus[0])
+            {
+                try {
+                viewer.startNewGame();
+                } catch (Exception e){
+                    JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage());
+                    return;
+                }
+            }
+            new LoadSolvedGameFrame().setVisible(true);
+            this.dispose();
+        }
+    }//GEN-LAST:event_newButtonActionPerformed
+
+    private void incompleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_incompleteButtonActionPerformed
+        try {
+            int[][] board = viewer.getGame('I');
+            new GameFrame(board).setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No incomplete game found");
+        }
+    }//GEN-LAST:event_incompleteButtonActionPerformed
+
+    public static void main(String args[]) {
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new SudokuGUI().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton incompleteButton;
+    private javax.swing.JButton newButton;
+    // End of variables declaration//GEN-END:variables
+}

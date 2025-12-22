@@ -1,9 +1,8 @@
 package com.mycompany.sudoku;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
+import java.util.Map;   
 
 public class GameGenerator {
     private RandomPairs randomPairs;
@@ -16,7 +15,7 @@ public class GameGenerator {
     public GameGenerator() {
         this.randomPairs = new RandomPairs();
         this.validator = new EnhancedValidator();
-        this.storage = new GameStorage("games");
+        this.storage = new GameStorage();
     }
 
     public boolean verifySolution(Game game) {
@@ -24,12 +23,10 @@ public class GameGenerator {
         return state == GameState.VALID;
     }
 
-    public boolean  generateFromSolved(Path sourceGamePath) throws  SolutionInvalidException, IOException
+    public boolean generateFromSolved(Game SourceGame) throws  SolutionInvalidException, IOException
     {
-        try{
-        Game SourceGame= storage.loadSolvedBoard(sourceGamePath);
         if (!verifySolution(SourceGame)) {
-            throw new SolutionInvalidException("Source Solution is Invaild/Incomplet");
+            throw new SolutionInvalidException("Source Solution is Invalid/Incomplete");
         }
         else 
         {
@@ -45,14 +42,9 @@ public class GameGenerator {
             } else {
                 return false;
             }
-        }
-        }
-        catch (IOException e) {
-            throw new IOException("Error loading source game from file: " + sourceGamePath.toString(), e);
-        }
-       
-
+        } 
     }
+    
 
     public Game removeCells (Game SourceGame , int cells)
     {

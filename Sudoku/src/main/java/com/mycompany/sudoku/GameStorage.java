@@ -16,13 +16,9 @@ public class GameStorage {
     private Path FullCurrentGamePath;
     private Path CurrentGameName;
 
-    public GameStorage() {
-        baseDir = null;
-        this.fileManager = new FileManager();
-    }
 
-    public GameStorage(String baseDir) {
-        this.baseDir = Paths.get(baseDir);
+    public GameStorage() {
+        this.baseDir = Paths.get("games");
         this.fileManager = new FileManager();
         verifyDirectory(this.baseDir);
 
@@ -42,8 +38,6 @@ public class GameStorage {
 
     public Game loadSolvedBoard(Path filePath) throws IOException {
         int[][] board = fileManager.readBoard(filePath);
-        this.baseDir = filePath.getParent();
-        verifyDirectory(filePath);
         return new Game(board);
     }
 
@@ -96,11 +90,9 @@ public class GameStorage {
         return true;
     }
 
-    // for current game
+   
     public boolean saveCurrentGame(Game game) throws IOException {
         Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
-        Path logFile = baseDir.resolve("incomplete").resolve("log.txt");
-         // Append to log file
         try{
         fileManager.writeBoard(gameFile, game.getBoard());
         }
@@ -160,4 +152,47 @@ public class GameStorage {
         }
         return true;
     }
+
+     public DifficultyEnum getCurrentDifficulty() {
+        String name = CurrentGameName.toString();
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
+        
+        String nameWithoutExt = name.replace(".sdk", "").toLowerCase();
+        
+        String[] parts = nameWithoutExt.split("_");
+        
+        if (parts.length >= 1) {
+            String difficultyStr = parts[0]; 
+            
+            switch (difficultyStr) {
+                case "easy":
+                    return DifficultyEnum.EASY;
+                case "medium":
+                    return DifficultyEnum.MEDIUM;
+                case "hard":
+                    return DifficultyEnum.HARD;
+                default:
+                    return null;
+            }
+        }
+        
+        return null;
+    }
+
+
+    public Game getCurrentGame() throws NotFoundException {
+        return ReadCurrentGame();
+    }
+      
+public Path getCurrentGamePath() {
+    return baseDir.resolve("incomplete").resolve(CurrentGameName);
+}
+
+public String getCurrentGameFolderPath() {
+    return baseDir.toString();
+}
+
+
 }
