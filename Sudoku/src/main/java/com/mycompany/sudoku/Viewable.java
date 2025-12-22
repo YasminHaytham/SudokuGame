@@ -9,7 +9,7 @@ public interface Viewable {
 String verifyGame(Game game);
 int[] solveGame(Game game) throws InvalidGameException;
 void logUserAction(String userAction) throws IOException;
-void abandonCurrentGame() throws IOException;
- public void undoLastAction() throws IOException;
+Game undoLastAction() throws IOException;  // Add this
+ void abandonCurrentGame() throws IOException , NotFoundException;
 // other methods can be added here as needed
 }

@@ -15,52 +15,121 @@ public class GameFrame extends javax.swing.JFrame {
     SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     private int[][] board;
 
+       private int[][] originalBoard;   // Original board (to track which cells were empty)
+    private boolean[][] editableCells; // Which cells can be edited
+    
     public GameFrame(int[][] board) {
         this.board = board;
+        
+        // Store original board
+        this.originalBoard = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            System.arraycopy(board[i], 0, originalBoard[i], 0, 9);
+        }
+        
+        // Track which cells are editable (originally empty)
+        this.editableCells = new boolean[9][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                editableCells[i][j] = (board[i][j] == 0); // Empty cells are editable
+            }
+        }
+        
         initComponents();
+        setupCellEditability();  // Make only empty cells editable
         attachAutoSaveAll();
         updateBoardUI();
     }
-
-    private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
-        UserAction action = new UserAction(x, y, oldValue, newValue);
-        try {
-            controller.logUserAction(action.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
+    
+    private void setupCellEditability() {
+        for (int i = 1; i <= 81; i++) {
+            try {
+                Field f = GameFrame.class.getDeclaredField("jTextField" + i);
+                f.setAccessible(true);
+                JTextField tf = (JTextField) f.get(this);
+                int row = (i - 1) / 9;
+                int col = (i - 1) % 9;
+                
+                // Only make originally empty cells editable
+                tf.setEditable(editableCells[row][col]);
+                
+                // Set background color to differentiate
+                if (!editableCells[row][col]) {
+                    tf.setBackground(Color.LIGHT_GRAY);
+                }
+                
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void attachAutoSave(JTextField textField, int x, int y) {
+private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
+    try {
+        // Only log if values are different AND cell is editable
+        if (editableCells[x][y] && oldValue != newValue) {
+            // Create UserAction object - check the constructor order
+            // Assuming: UserAction(x, y, oldValue, newValue)
+            UserAction action = new UserAction(x, y, oldValue, newValue);
+            
+            System.out.println("DEBUG: Creating UserAction: " + action.toString());
+            
+            // Log through viewer
+            viewer.logUserAction(action);
+        }
+    } catch (Exception e) {
+        System.err.println("Error logging action: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+ private void attachAutoSave(JTextField textField, int x, int y) {
+        // Only attach listener to editable cells
+        if (!editableCells[x][y]) {
+            return;
+        }
+        
         textField.getDocument().addDocumentListener(new DocumentListener() {
             private String previousValue = textField.getText();
-
+            
             @Override
             public void insertUpdate(DocumentEvent e) {
                 saveChange();
             }
-
+            
             @Override
             public void removeUpdate(DocumentEvent e) {
                 saveChange();
             }
-
+            
             @Override
             public void changedUpdate(DocumentEvent e) {
                 saveChange();
             }
-
+            
             private void saveChange() {
                 try {
                     String newText = textField.getText();
                     int newValue = newText.isEmpty() ? 0 : Integer.parseInt(newText);
                     int oldValue = previousValue.isEmpty() ? 0 : Integer.parseInt(previousValue);
-
-                    board[x][y] = newValue;
-
-                    logUserActionForCell(x, y, oldValue, newValue);
-
+                    
+                    // Validate the value is 1-9 (or 0 for empty)
+                    if (newValue < 0 || newValue > 9) {
+                        textField.setText(previousValue);
+                        return;
+                    }
+                    
+                    // Only log if cell was originally empty AND value actually changed
+                    if (editableCells[x][y] && newValue != oldValue) {
+                        // Update the board
+                        board[x][y] = newValue;
+                        
+                        // Log the action
+                        logUserActionForCell(x, y, oldValue, newValue);
+                    }
+                    
+                    // Update previous value for next change
                     previousValue = newText;
+                    
                 } catch (NumberFormatException ex) {
                     textField.setText(previousValue);
                 }
@@ -68,6 +137,25 @@ public class GameFrame extends javax.swing.JFrame {
         });
     }
 
+    private void updateUndoButtonState() {
+    try {
+        // Check if there's a current game loaded
+        GameStorage storage = new GameStorage();
+        boolean hasCurrentGame = storage.getCurrentGame() != null;
+        
+        // Enable/disable undo button based on availability
+        UndoButton.setEnabled(hasCurrentGame);
+        
+        if (hasCurrentGame) {
+            UndoButton.setToolTipText("Undo last move");
+        } else {
+            UndoButton.setToolTipText("No game loaded - undo not available");
+        }
+    } catch (Exception e) {
+        UndoButton.setEnabled(false);
+        UndoButton.setToolTipText("Undo not available");
+    }
+}
     private void attachAutoSaveAll() {
         for (int i = 1; i <= 81; i++) {
             try {
@@ -349,21 +437,203 @@ public class GameFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField81ActionPerformed
 
-    private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VerifyButtonActionPerformed
-        viewer.verifyGame(board);
-    }//GEN-LAST:event_VerifyButtonActionPerformed
-
-    private void SolveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SolveButtonActionPerformed
-        try {
-            viewer.solveGame(board);
-        } catch (InvalidGameException ex) {
-            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    try {
+        // Get the validity matrix from viewer
+        boolean[][] validity = viewer.verifyGame(board);
+        
+        if (validity == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Verification failed - returned null", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    }//GEN-LAST:event_SolveButtonActionPerformed
+        
+        // First, reset all cell backgrounds to their default state
+        resetAllCellBackgrounds();
+        
+        // Count and highlight invalid cells
+        int invalidCount = 0;
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                JTextField cell = getCell(i, j);
+                if (cell != null && !validity[i][j]) {
+                    cell.setBackground(Color.PINK);
+                    invalidCount++;
+                }
+            }
+        }
+        
+        // Determine the board state
+        boolean isComplete = isBoardComplete();
+        boolean hasErrors = (invalidCount > 0);
+        
+        // Show appropriate message based on board state
+        String message;
+        if (isComplete && !hasErrors) {
+            message = "✓ Board is complete and valid! Congratulations!";
+            JOptionPane.showMessageDialog(this, message, 
+                "Verification Result", JOptionPane.INFORMATION_MESSAGE);
+        } 
+        else if (isComplete && hasErrors) {
+            message = "✗ Board is complete but has " + invalidCount + " errors (highlighted in pink)";
+            JOptionPane.showMessageDialog(this, message, 
+                "Verification Result", JOptionPane.WARNING_MESSAGE);
+        } 
+        else if (!isComplete && !hasErrors) {
+            message = "✓ Board is valid so far (still has empty cells)";
+            JOptionPane.showMessageDialog(this, message, 
+                "Verification Result", JOptionPane.INFORMATION_MESSAGE);
+        } 
+        else { // !isComplete && hasErrors
+            message = "⚠ Found " + invalidCount + " errors in incomplete board (highlighted in pink)";
+            JOptionPane.showMessageDialog(this, message, 
+                "Verification Result", JOptionPane.WARNING_MESSAGE);
+        }
+        
+        // Optional: Log the verification result
+        System.out.println("Verification: " + message);
+        
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, 
+            "Error verifying board: " + ex.getMessage(), 
+            "Error", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
+    }
+}
 
-    private void UndoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UndoButtonActionPerformed
-        viewer.undoLastAction(board);
-     }//GEN-LAST:event_UndoButtonActionPerformed
+// Helper method to reset all cell backgrounds
+private void resetAllCellBackgrounds() {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            JTextField cell = getCell(i, j);
+            if (cell != null) {
+                if (!editableCells[i][j]) {
+                    // Original puzzle cells (not editable)
+                    cell.setBackground(Color.LIGHT_GRAY);
+                } else {
+                    // User-editable cells
+                    cell.setBackground(Color.WHITE);
+                }
+            }
+        }
+    }
+}
+
+// Helper method to check if board is complete (no zeros)
+private boolean isBoardComplete() {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (board[i][j] == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Helper method to get cell by coordinates
+private JTextField getCell(int row, int col) {
+    try {
+        int index = row * 9 + col + 1;  // jTextField1 to jTextField81
+        Field f = GameFrame.class.getDeclaredField("jTextField" + index);
+        f.setAccessible(true);
+        return (JTextField) f.get(this);
+    } catch (Exception e) {
+        return null;
+    }
+}
+
+
+private void SolveButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    try {
+        // Get solution
+        int[][] solution = viewer.solveGame(board);
+        
+        if (solution == null || solution.length == 0) {
+            JOptionPane.showMessageDialog(this, 
+                "No solution found or solver not applicable", 
+                "Solve", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Apply solution to board
+        for (int i = 0; i < solution.length; i++) {
+            int row = solution[i][0];
+            int col = solution[i][1];
+            int value = solution[i][2];
+            
+            // Update board
+            board[row][col] = value;
+            
+            // Update UI
+            updateCell(row, col, value);
+        }
+        
+        JOptionPane.showMessageDialog(this, 
+            "Board solved!", 
+            "Solve", 
+            JOptionPane.INFORMATION_MESSAGE);
+        
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, 
+            "Solve error: " + ex.getMessage(), 
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+private void updateCell(int row, int col, int value) {
+    int fieldNumber = row * 9 + col + 1;
+    
+    try {
+        java.lang.reflect.Field field = GameFrame.class.getDeclaredField("jTextField" + fieldNumber);
+        field.setAccessible(true);
+        javax.swing.JTextField textField = (javax.swing.JTextField) field.get(this);
+        textField.setText(value == 0 ? "" : String.valueOf(value));
+        textField.setBackground(java.awt.Color.GREEN);  // Highlight solved cells
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}//GEN-LAST:event_SolveButtonActionPerformed
+
+private void UndoButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    try {
+        System.out.println("DEBUG: Attempting undo...");
+        System.out.println("DEBUG: Current board before undo:");
+        printBoard(board);
+        
+        int[][] updatedBoard = viewer.undoLastAction();
+        
+        System.out.println("DEBUG: Updated board after undo:");
+        printBoard(updatedBoard);
+        
+        if (updatedBoard != null) {
+            board = updatedBoard;
+            updateBoardUI();
+            
+            JOptionPane.showMessageDialog(this, 
+                "Undo successful!", 
+                "Undo", JOptionPane.INFORMATION_MESSAGE);
+        }
+            
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(this, 
+            "Cannot undo: " + e.getMessage(), 
+            "Undo Error", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
+}
+
+private void printBoard(int[][] board) {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            System.out.print(board[i][j] + " ");
+        }
+        System.out.println();
+    }
+}
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         SudokuGUI mainGUI = new SudokuGUI();

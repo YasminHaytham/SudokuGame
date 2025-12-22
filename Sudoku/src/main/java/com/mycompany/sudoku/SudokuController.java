@@ -8,15 +8,27 @@ public class SudokuController implements Viewable {
     private final GameStorage storage;
     private final GameGenerator generator;
     private final Catalog catalog;
-    private final UndoManager undoManager;
-
+    private UndoManager undoManager;
+    
     public SudokuController() {
+
         this.validator = new EnhancedValidator();
         this.storage = new GameStorage();
         this.generator = new GameGenerator();
         this.catalog = new Catalog();
-        this.undoManager = new UndoManager("games");
+        this.undoManager = null; 
     }
+
+// Method to initialize undo manager when game is loaded
+private void initializeUndoManager() {
+    try {
+        String gameFolderPath = storage.getCurrentGameFolderPath();
+        this.undoManager = new UndoManager(gameFolderPath);
+    } catch (Exception e) {
+        System.err.println("Failed to initialize undo manager: " + e.getMessage());
+    }
+}
+    
 
     @Override
     public String verifyGame(Game game) {
@@ -45,6 +57,13 @@ public class SudokuController implements Viewable {
     }
 
     private String handleCVGame(Game game) {
+       
+        try {
+            storage.getCurrentGame();
+        } catch (NotFoundException e) {
+             e.printStackTrace();
+        }
+
         DifficultyEnum currentDifficulty = storage.getCurrentDifficulty();
         try {
             boolean deletedFromFolder = storage.deleteGameFromFolder(currentDifficulty);
@@ -68,15 +87,6 @@ public class SudokuController implements Viewable {
     @Override
     public Catalog getCatalog() {
         return catalog;
-    }
-
-    @Override
-    public Game getGame(DifficultyEnum level) throws NotFoundException {
-        if (level == null) {
-            return storage.ReadCurrentGame();
-        }
-        return storage.readGame(level);
-
     }
 
     @Override
@@ -116,52 +126,90 @@ public class SudokuController implements Viewable {
         }
     }
 
-    @Override
-    public void undoLastAction() throws IOException {
-        if (!canUndo()) {
-            throw new IOException("No actions to undo");
-        }
-        Game currentGame;
-        try {
-            currentGame = storage.getCurrentGame();
-            if (currentGame == null) {
-                throw new IOException("No game loaded");
-            }
-            undoManager.undo(currentGame);
-            storage.saveCurrentGame(currentGame);
 
-        } catch (NotFoundException e) {
-            System.out.println("Error retrieving current game for undo: " + e.getMessage());
-        }
-
-    }
-    private boolean canUndo() {
-        return undoManager != null && undoManager.canUndo();
-    }
 
     @Override
-    public void logUserAction(String userAction) throws IOException {
-        String clean = userAction.replace("(", "").replace(")", "");
-        String[] parts = clean.split(",");
-
-        if (parts.length != 4) {
-            throw new IllegalArgumentException("Invalid log format: " + userAction);
-        }
-
-        int x = Integer.parseInt(parts[0]);
-        int y = Integer.parseInt(parts[1]);
-        int oldValue = Integer.parseInt(parts[2]);
-        int newValue = Integer.parseInt(parts[3]);
-        undoManager.logAction(x, y, newValue, oldValue);
-
-    }
-
-    @Override
-    public void abandonCurrentGame() throws IOException {
+    public void abandonCurrentGame() throws IOException, NotFoundException {
+        storage.getCurrentGame();
         boolean deleted = storage.deleteCurrentGame();
 
         if (!deleted) {
             throw new IOException("Failed to delete current game");
         }
     }
+        @Override
+    public Game getGame(DifficultyEnum level) throws NotFoundException {
+        Game game;
+        if (level == null) {
+            game = storage.ReadCurrentGame();
+        } else {
+            game = storage.readGame(level);
+        }
+        
+     
+        
+        return game;
+    }
+    
+    // Update logUserAction to handle null undoManager
+    @Override
+    public void logUserAction(String userAction) throws IOException {
+        if (undoManager == null) {
+            // Try to initialize undo manager
+            initializeUndoManager();
+            if (undoManager == null) {
+                // Still null, just return without logging
+                System.err.println("Warning: Cannot log action - no undo manager");
+                return;
+            }
+        }
+        
+        String clean = userAction.replace("(", "").replace(")", "");
+        String[] parts = clean.split(",");
+        
+        if (parts.length != 4) {
+            throw new IllegalArgumentException("Invalid log format: " + userAction);
+        }
+        
+       int x = Integer.parseInt(parts[0]);
+    int y = Integer.parseInt(parts[1]);
+    int oldValue = Integer.parseInt(parts[2]);
+    int newValue = Integer.parseInt(parts[3]);
+    
+
+    undoManager.logAction(x, y, newValue, oldValue);
+
+    }
+    
+    // Update other methods that use undoManager
+ @Override
+    public Game undoLastAction() throws IOException {
+        if (undoManager == null) {
+            throw new IOException("No undo manager initialized");
+        }
+        
+        if (!undoManager.canUndo()) {
+            throw new IOException("No actions to undo");
+        }
+        
+        try {
+            Game currentGame = storage.getCurrentGame();
+            if (currentGame == null) {
+                throw new IOException("No game loaded");
+            }
+            
+            // Perform undo
+            undoManager.undo(currentGame);
+            
+        
+            
+            // Return the updated game
+            return currentGame;
+            
+        } catch (NotFoundException e) {
+            throw new IOException("Error retrieving current game for undo: " + e.getMessage());
+        }
+    }
+    
+  
 }

@@ -186,6 +186,13 @@ public class GameStorage {
         return ReadCurrentGame();
     }
       
+public Path getCurrentGamePath() {
+    return baseDir.resolve("incomplete").resolve(CurrentGameName);
+}
+
+public String getCurrentGameFolderPath() {
+    return baseDir.toString();
+}
 
 
 }

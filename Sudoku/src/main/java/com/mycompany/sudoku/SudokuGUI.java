@@ -64,7 +64,7 @@ SudokuController controller = new SudokuController();
          if (catalogStatus[1]) {
             if (catalogStatus[0])
             {
-                try{
+                try {
                 viewer.startNewGame();
                 } catch (Exception e){
                     JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage());
@@ -76,7 +76,7 @@ SudokuController controller = new SudokuController();
         } else {
               if (catalogStatus[0])
             {
-                try{
+                try {
                 viewer.startNewGame();
                 } catch (Exception e){
                     JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage());
