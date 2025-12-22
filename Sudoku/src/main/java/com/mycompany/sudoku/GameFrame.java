@@ -439,88 +439,47 @@ private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
 
 private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {
     try {
-        // Get the validity matrix from viewer
         boolean[][] validity = viewer.verifyGame(board);
         
         if (validity == null) {
-            JOptionPane.showMessageDialog(this, 
-                "Verification failed - returned null", 
-                "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "The game is not complete or has errors.", 
+                "Verification Result", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
-        // First, reset all cell backgrounds to their default state
-        resetAllCellBackgrounds();
-        
-        // Count and highlight invalid cells
+        // Highlight invalid cells
         int invalidCount = 0;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 JTextField cell = getCell(i, j);
-                if (cell != null && !validity[i][j]) {
-                    cell.setBackground(Color.PINK);
-                    invalidCount++;
+                if (cell != null) {
+                    if (!validity[i][j]) {
+                        cell.setBackground(Color.PINK);
+                        invalidCount++;
+                    } else {
+                        cell.setBackground(Color.WHITE);
+                    }
                 }
             }
         }
         
-        // Determine the board state
-        boolean isComplete = isBoardComplete();
-        boolean hasErrors = (invalidCount > 0);
-        
-        // Show appropriate message based on board state
-        String message;
-        if (isComplete && !hasErrors) {
-            message = "✓ Board is complete and valid! Congratulations!";
-            JOptionPane.showMessageDialog(this, message, 
+        if (invalidCount == 0) {
+            JOptionPane.showMessageDialog(this, 
+                "✓ Board is valid!", 
                 "Verification Result", JOptionPane.INFORMATION_MESSAGE);
-        } 
-        else if (isComplete && hasErrors) {
-            message = "✗ Board is complete but has " + invalidCount + " errors (highlighted in pink)";
-            JOptionPane.showMessageDialog(this, message, 
-                "Verification Result", JOptionPane.WARNING_MESSAGE);
-        } 
-        else if (!isComplete && !hasErrors) {
-            message = "✓ Board is valid so far (still has empty cells)";
-            JOptionPane.showMessageDialog(this, message, 
-                "Verification Result", JOptionPane.INFORMATION_MESSAGE);
-        } 
-        else { // !isComplete && hasErrors
-            message = "⚠ Found " + invalidCount + " errors in incomplete board (highlighted in pink)";
-            JOptionPane.showMessageDialog(this, message, 
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "✗ Found " + invalidCount + " invalid cells (highlighted in pink)", 
                 "Verification Result", JOptionPane.WARNING_MESSAGE);
         }
-        
-        // Optional: Log the verification result
-        System.out.println("Verification: " + message);
         
     } catch (Exception ex) {
         JOptionPane.showMessageDialog(this, 
             "Error verifying board: " + ex.getMessage(), 
             "Error", JOptionPane.ERROR_MESSAGE);
-        ex.printStackTrace();
     }
 }
 
-// Helper method to reset all cell backgrounds
-private void resetAllCellBackgrounds() {
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            JTextField cell = getCell(i, j);
-            if (cell != null) {
-                if (!editableCells[i][j]) {
-                    // Original puzzle cells (not editable)
-                    cell.setBackground(Color.LIGHT_GRAY);
-                } else {
-                    // User-editable cells
-                    cell.setBackground(Color.WHITE);
-                }
-            }
-        }
-    }
-}
-
-// Helper method to check if board is complete (no zeros)
 private boolean isBoardComplete() {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {

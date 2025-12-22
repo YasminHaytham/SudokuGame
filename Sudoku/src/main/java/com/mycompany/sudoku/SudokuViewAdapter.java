@@ -124,7 +124,6 @@ public boolean[][] verifyGame(int[][] game) {
         return validity;
     }
 }
-
     @Override
     public int[][] solveGame(int[][] game) throws InvalidGameException {
            Game g = new Game(game);
