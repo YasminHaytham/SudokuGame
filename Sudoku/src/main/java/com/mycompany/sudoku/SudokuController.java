@@ -157,7 +157,6 @@ public void logUserAction(String userAction) throws IOException {
         initializeUndoManager();
     }
 
-    
     String clean = userAction.replace("(", "").replace(")", "");
     String[] parts = clean.split(",");
 
@@ -166,16 +165,26 @@ public void logUserAction(String userAction) throws IOException {
     int newValue = Integer.parseInt(parts[2]);
     int oldValue = Integer.parseInt(parts[3]);
 
-    
+    System.out.println("DEBUG: Logging action at (" + x + "," + y + "): " + oldValue + " -> " + newValue);
+
     undoManager.logAction(x, y, newValue, oldValue);
 
-    
     Game currentGame;
     try {
         currentGame = storage.getCurrentGame();
+        System.out.println("DEBUG: Current game empty cells: " + currentGame.getEmptyCells());
+        
         currentGame.getBoard()[x][y] = newValue;
+        System.out.println("DEBUG: Updated board at (" + x + "," + y + ") to " + newValue);
+        
         storage.saveCurrentGame(currentGame);
+        System.out.println("DEBUG: Game saved successfully");
+        
     } catch (NotFoundException e) {
+        System.err.println("ERROR: Game not found: " + e.getMessage());
+        e.printStackTrace();
+    } catch (Exception e) {
+        System.err.println("ERROR: Failed to save game: " + e.getMessage());
         e.printStackTrace();
     }
 }

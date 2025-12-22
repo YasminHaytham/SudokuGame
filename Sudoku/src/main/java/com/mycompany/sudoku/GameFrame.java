@@ -68,7 +68,7 @@ private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
        
         if (editableCells[x][y] && oldValue != newValue) {
            
-            UserAction action = new UserAction(x, y, oldValue, newValue);
+            UserAction action = new UserAction(x, y, newValue, oldValue);
             
             System.out.println("DEBUG: Creating UserAction: " + action.toString());
             
