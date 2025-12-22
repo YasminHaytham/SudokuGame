@@ -154,4 +154,32 @@ public class GameStorage {
         }
         return true;
     }
+
+     public DifficultyEnum getCurrentDifficulty() {
+        String name = CurrentGameName.toString();
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
+        
+        String nameWithoutExt = name.replace(".sdk", "").toLowerCase();
+        
+        String[] parts = nameWithoutExt.split("_");
+        
+        if (parts.length >= 1) {
+            String difficultyStr = parts[0]; 
+            
+            switch (difficultyStr) {
+                case "easy":
+                    return DifficultyEnum.EASY;
+                case "medium":
+                    return DifficultyEnum.MEDIUM;
+                case "hard":
+                    return DifficultyEnum.HARD;
+                default:
+                    return null;
+            }
+        }
+        
+        return null;
+    }
 }

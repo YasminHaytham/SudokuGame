@@ -3,11 +3,16 @@ package com.mycompany.sudoku;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class SudokuViewFacade implements Controllable{
+public class SudokuViewAdapter implements Controllable{
     private final Viewable controller;
     
-    public SudokuViewFacade(Viewable controller) {
+    public SudokuViewAdapter(Viewable controller) {
         this.controller = controller;
+    }
+
+    @Override
+    public void startNewGame() throws IOException {
+        controller.abandonCurrentGame();
     }
 
     @Override
@@ -28,6 +33,9 @@ public class SudokuViewFacade implements Controllable{
                 break;
             case 'H':
                 difficulty = DifficultyEnum.HARD;
+                break;
+            case 'I':
+                difficulty = null; 
                 break;
             default:
                 throw new IllegalArgumentException("Invalid level: " + level);
@@ -85,6 +93,8 @@ public class SudokuViewFacade implements Controllable{
 
         return result;
     }
+
+    
 
     @Override
     public void logUserAction(UserAction userAction) throws IOException {
