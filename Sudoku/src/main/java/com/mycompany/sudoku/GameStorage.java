@@ -90,11 +90,9 @@ public class GameStorage {
         return true;
     }
 
-    // for current game
+   
     public boolean saveCurrentGame(Game game) throws IOException {
         Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
-        Path logFile = baseDir.resolve("incomplete").resolve("log.txt");
-         // Append to log file
         try{
         fileManager.writeBoard(gameFile, game.getBoard());
         }
@@ -182,4 +180,19 @@ public class GameStorage {
         
         return null;
     }
+
+
+    public Game getCurrentGame() throws NotFoundException {
+        return ReadCurrentGame();
+    }
+      
+public Path getCurrentGamePath() {
+    return baseDir.resolve("incomplete").resolve(CurrentGameName);
+}
+
+public String getCurrentGameFolderPath() {
+    return baseDir.toString();
+}
+
+
 }

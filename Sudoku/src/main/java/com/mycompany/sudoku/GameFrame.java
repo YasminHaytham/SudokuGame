@@ -15,52 +15,119 @@ public class GameFrame extends javax.swing.JFrame {
     SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     private int[][] board;
 
+       private int[][] originalBoard;  
+    private boolean[][] editableCells; 
     public GameFrame(int[][] board) {
         this.board = board;
+        
+        
+        this.originalBoard = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            System.arraycopy(board[i], 0, originalBoard[i], 0, 9);
+        }
+        
+        
+        this.editableCells = new boolean[9][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                editableCells[i][j] = (board[i][j] == 0); 
+            }
+        }
+        
         initComponents();
+        setupCellEditability();  
         attachAutoSaveAll();
         updateBoardUI();
     }
-
-    private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
-        UserAction action = new UserAction(x, y, oldValue, newValue);
-        try {
-            controller.logUserAction(action.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
+    
+    private void setupCellEditability() {
+        for (int i = 1; i <= 81; i++) {
+            try {
+                Field f = GameFrame.class.getDeclaredField("jTextField" + i);
+                f.setAccessible(true);
+                JTextField tf = (JTextField) f.get(this);
+                int row = (i - 1) / 9;
+                int col = (i - 1) % 9;
+                
+                
+                tf.setEditable(editableCells[row][col]);
+                
+                
+                if (!editableCells[row][col]) {
+                    tf.setBackground(Color.LIGHT_GRAY);
+                }
+                
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void attachAutoSave(JTextField textField, int x, int y) {
+private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
+    try {
+       
+        if (editableCells[x][y] && oldValue != newValue) {
+           
+            UserAction action = new UserAction(x, y, newValue, oldValue);
+            
+            System.out.println("DEBUG: Creating UserAction: " + action.toString());
+            
+          
+            viewer.logUserAction(action);
+        }
+    } catch (Exception e) {
+        System.err.println("Error logging action: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+ private void attachAutoSave(JTextField textField, int x, int y) {
+        
+        if (!editableCells[x][y]) {
+            return;
+        }
+        
         textField.getDocument().addDocumentListener(new DocumentListener() {
             private String previousValue = textField.getText();
-
+            
             @Override
             public void insertUpdate(DocumentEvent e) {
                 saveChange();
             }
-
+            
             @Override
             public void removeUpdate(DocumentEvent e) {
                 saveChange();
             }
-
+            
             @Override
             public void changedUpdate(DocumentEvent e) {
                 saveChange();
             }
-
+            
             private void saveChange() {
                 try {
                     String newText = textField.getText();
                     int newValue = newText.isEmpty() ? 0 : Integer.parseInt(newText);
                     int oldValue = previousValue.isEmpty() ? 0 : Integer.parseInt(previousValue);
-
-                    board[x][y] = newValue;
-
-                    logUserActionForCell(x, y, oldValue, newValue);
-
+                    
+                  
+                    if (newValue < 0 || newValue > 9) {
+                        textField.setText(previousValue);
+                        return;
+                    }
+                    
+                    
+                    if (editableCells[x][y] && newValue != oldValue) {
+                       
+                        board[x][y] = newValue;
+                        
+                       
+                        logUserActionForCell(x, y, oldValue, newValue);
+                    }
+                    
+                    
                     previousValue = newText;
+                    
                 } catch (NumberFormatException ex) {
                     textField.setText(previousValue);
                 }
@@ -68,6 +135,25 @@ public class GameFrame extends javax.swing.JFrame {
         });
     }
 
+    private void updateUndoButtonState() {
+    try {
+        
+        GameStorage storage = new GameStorage();
+        boolean hasCurrentGame = storage.getCurrentGame() != null;
+        
+
+        UndoButton.setEnabled(hasCurrentGame);
+        
+        if (hasCurrentGame) {
+            UndoButton.setToolTipText("Undo last move");
+        } else {
+            UndoButton.setToolTipText("No game loaded - undo not available");
+        }
+    } catch (Exception e) {
+        UndoButton.setEnabled(false);
+        UndoButton.setToolTipText("Undo not available");
+    }
+}
     private void attachAutoSaveAll() {
         for (int i = 1; i <= 81; i++) {
             try {
@@ -349,21 +435,162 @@ public class GameFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField81ActionPerformed
 
-    private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VerifyButtonActionPerformed
-        viewer.verifyGame(board);
-    }//GEN-LAST:event_VerifyButtonActionPerformed
-
-    private void SolveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SolveButtonActionPerformed
-        try {
-            viewer.solveGame(board);
-        } catch (InvalidGameException ex) {
-            Logger.getLogger(GameFrame.class.getName()).log(Level.SEVERE, null, ex);
+private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    try {
+        boolean[][] validity = viewer.verifyGame(board);
+        
+        if (validity == null) {
+            JOptionPane.showMessageDialog(this, "The game is not complete or has errors.", 
+                "Verification Result", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-    }//GEN-LAST:event_SolveButtonActionPerformed
+        
+        
+        int invalidCount = 0;
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                JTextField cell = getCell(i, j);
+                if (cell != null) {
+                    if (!validity[i][j]) {
+                        cell.setBackground(Color.PINK);
+                        invalidCount++;
+                    } else {
+                        cell.setBackground(Color.WHITE);
+                    }
+                }
+            }
+        }
+        
+        if (invalidCount == 0) {
+            JOptionPane.showMessageDialog(this, 
+                "✓ Board is valid!", 
+                "Verification Result", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "✗ Found " + invalidCount + " invalid cells (highlighted in pink)", 
+                "Verification Result", JOptionPane.WARNING_MESSAGE);
+        }
+        
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, 
+            "Error verifying board: " + ex.getMessage(), 
+            "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
 
-    private void UndoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UndoButtonActionPerformed
-        viewer.undoLastAction(board);
-     }//GEN-LAST:event_UndoButtonActionPerformed
+private boolean isBoardComplete() {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (board[i][j] == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+private JTextField getCell(int row, int col) {
+    try {
+        int index = row * 9 + col + 1;  
+        Field f = GameFrame.class.getDeclaredField("jTextField" + index);
+        f.setAccessible(true);
+        return (JTextField) f.get(this);
+    } catch (Exception e) {
+        return null;
+    }
+}
+
+
+private void SolveButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    try {
+        // Get solution
+        int[][] solution = viewer.solveGame(board);
+        
+        if (solution == null || solution.length == 0) {
+            JOptionPane.showMessageDialog(this, 
+                "No solution found or solver not applicable", 
+                "Solve", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+       
+        for (int i = 0; i < solution.length; i++) {
+            int row = solution[i][0];
+            int col = solution[i][1];
+            int value = solution[i][2];
+            
+           
+            board[row][col] = value;
+            
+           
+            updateCell(row, col, value);
+        }
+        
+        JOptionPane.showMessageDialog(this, 
+            "Board solved!", 
+            "Solve", 
+            JOptionPane.INFORMATION_MESSAGE);
+        
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, 
+            "Solve error: " + ex.getMessage(), 
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+private void updateCell(int row, int col, int value) {
+    int fieldNumber = row * 9 + col + 1;
+    
+    try {
+        java.lang.reflect.Field field = GameFrame.class.getDeclaredField("jTextField" + fieldNumber);
+        field.setAccessible(true);
+        javax.swing.JTextField textField = (javax.swing.JTextField) field.get(this);
+        textField.setText(value == 0 ? "" : String.valueOf(value));
+        textField.setBackground(java.awt.Color.GREEN);  
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}//GEN-LAST:event_SolveButtonActionPerformed
+
+private void UndoButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    try {
+        System.out.println("DEBUG: Attempting undo...");
+        System.out.println("DEBUG: Current board before undo:");
+        printBoard(board);
+        
+        int[][] updatedBoard = viewer.undoLastAction();
+        
+        System.out.println("DEBUG: Updated board after undo:");
+        printBoard(updatedBoard);
+        
+        if (updatedBoard != null) {
+            board = updatedBoard;
+            updateBoardUI();
+            
+            JOptionPane.showMessageDialog(this, 
+                "Undo successful!", 
+                "Undo", JOptionPane.INFORMATION_MESSAGE);
+        }
+            
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(this, 
+            "Cannot undo: " + e.getMessage(), 
+            "Undo Error", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
+}
+
+private void printBoard(int[][] board) {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            System.out.print(board[i][j] + " ");
+        }
+        System.out.println();
+    }
+}
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         SudokuGUI mainGUI = new SudokuGUI();

@@ -1,18 +1,21 @@
 package com.mycompany.sudoku;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EnhancedValidator {
-
     private List<String> errors = new ArrayList<>();
+    private int[][] board;
 
     public GameState validate(Game game) {
         errors.clear();
-        int[][] board = game.getBoard();
-        checkRows(board);
-        checkColumns(board);
-        checkBoxes(board);
+        this.board = game.getBoard();
+        
+        checkRowsForDuplicates();
+        checkColumnsForDuplicates();
+        checkBoxesForDuplicates();
 
         if (!errors.isEmpty())
             return GameState.INVALID;
@@ -25,132 +28,141 @@ public class EnhancedValidator {
 
     public String verifyGame(Game game) {
         GameState state = validate(game);
+        
         if (state == GameState.VALID)
             return "valid";
 
         if (state == GameState.INCOMPLETE)
             return "incomplete";
 
-        return formatErrors();
+        return "invalid " + getInvalidCoordinates();
     }
 
-    private String formatErrors() {
-        StringBuilder sb = new StringBuilder("invalid ");
-        for (String e : errors) {
-            sb.append(e).append(" ");
+    private String getInvalidCoordinates() {
+        Set<String> coordinates = new HashSet<>();
+        
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] != 0 && !isValidCell(i, j, board[i][j])) {
+                    coordinates.add(i + "," + j);
+                }
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (String coord : coordinates) {
+            sb.append(coord).append(" ");
         }
         return sb.toString().trim();
     }
 
-    private void checkRows(int[][] board) {
-        for (int r = 0; r < 9; r++) {
-            boolean[] seen = new boolean[10];
-            for (int c = 0; c < 9; c++) {
-                int v = board[r][c];
-                if (v != 0) {
-                    if (seen[v]) {
-                        errors.add("(r" + r + ")");
-                    } else {
-                        seen[v] = true;
-                    }
-                }
-            }
-        }
-    }
-
-    private void checkColumns(int[][] board) {
-        for (int c = 0; c < 9; c++) {
-            boolean[] seen = new boolean[10];
-            for (int r = 0; r < 9; r++) {
-                int v = board[r][c];
-                if (v != 0) {
-                    if (seen[v]) {
-                        errors.add("(c" + c + ")");
-                    } else {
-                        seen[v] = true;
-                    }
-                }
-            }
-        }
-    }
-
-    private void checkBoxes(int[][] board) {
-        for (int br = 0; br < 3; br++) {
-            for (int bc = 0; bc < 3; bc++) {
-
-                boolean[] seen = new boolean[10];
-
-                for (int r = br * 3; r < br * 3 + 3; r++) {
-                    for (int c = bc * 3; c < bc * 3 + 3; c++) {
-                        int v = board[r][c];
-
-                        if (v != 0) {
-                            if (seen[v]) {
-                                errors.add("(b" + br + "," + bc + ")");
-                            } else {
-                                seen[v] = true;
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-    }
     public List<String> getErrors() {
         return errors;
     }
 
-    public boolean isValidBoard(int[][] board) {
-        errors.clear();
-        checkRows(board);
-        checkColumns(board);
-        checkBoxes(board);
-        return errors.isEmpty();
-    }
-        // NEW METHOD: Just check if valid without error collection
     public boolean isBoardValid(int[][] board) {
-        // Simplified check without collecting errors
-        return checkRowsSimple(board) && checkColumnsSimple(board) && checkBoxesSimple(board);
-    }
-    
-    private boolean checkRowsSimple(int[][] board) {
-        for (int r = 0; r < 9; r++) {
-            boolean[] seen = new boolean[10];
-            for (int c = 0; c < 9; c++) {
-                int v = board[r][c];
-                if (v != 0 && seen[v]) return false;
-                if (v != 0) seen[v] = true;
-            }
-        }
-        return true;
-    }
-    
-    private boolean checkColumnsSimple(int[][] board) {
-        for (int c = 0; c < 9; c++) {
-            boolean[] seen = new boolean[10];
-            for (int r = 0; r < 9; r++) {
-                int v = board[r][c];
-                if (v != 0 && seen[v]) return false;
-                if (v != 0) seen[v] = true;
-            }
-        }
-        return true;
-    }
-    
-    private boolean checkBoxesSimple(int[][] board) {
-        for (int br = 0; br < 3; br++) {
-            for (int bc = 0; bc < 3; bc++) {
-                boolean[] seen = new boolean[10];
-                for (int r = br * 3; r < br * 3 + 3; r++) {
-                    for (int c = bc * 3; c < bc * 3 + 3; c++) {
-                        int v = board[r][c];
-                        if (v != 0 && seen[v]) return false;
-                        if (v != 0) seen[v] = true;
-                    }
+        this.board = board;
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] != 0 && !isValidCell(i, j, board[i][j])) {
+                    return false;
                 }
             }
         }
         return true;
+    }
+    
+    public boolean isValidCell(int x, int y, int value) {
+        if (value == 0) return true;
+        
+        for (int col = 0; col < 9; col++) {
+            if (col != y && board[x][col] == value) {
+                return false;
+            }
+        }
+        
+        for (int row = 0; row < 9; row++) {
+            if (row != x && board[row][y] == value) {
+                return false;
+            }
+        }
+        
+        int boxStartRow = (x / 3) * 3;
+        int boxStartCol = (y / 3) * 3;
+        for (int i = boxStartRow; i < boxStartRow + 3; i++) {
+            for (int j = boxStartCol; j < boxStartCol + 3; j++) {
+                if (i != x && j != y && board[i][j] == value) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    private void checkRowsForDuplicates() {
+        for (int row = 0; row < 9; row++) {
+            boolean[] seen = new boolean[10];
+            for (int col = 0; col < 9; col++) {
+                int val = board[row][col];
+                if (val != 0) {
+                    if (seen[val]) {
+                        errors.add("Row " + row + " duplicate " + val);
+                    }
+                    seen[val] = true;
+                }
+            }
+        }
+    }
+    
+    private void checkColumnsForDuplicates() {
+        for (int col = 0; col < 9; col++) {
+            boolean[] seen = new boolean[10];
+            for (int row = 0; row < 9; row++) {
+                int val = board[row][col];
+                if (val != 0) {
+                    if (seen[val]) {
+                        errors.add("Column " + col + " duplicate " + val);
+                    }
+                    seen[val] = true;
+                }
+            }
+        }
+    }
+    
+    private void checkBoxesForDuplicates() {
+        for (int boxRow = 0; boxRow < 3; boxRow++) {
+            for (int boxCol = 0; boxCol < 3; boxCol++) {
+                boolean[] seen = new boolean[10];
+                for (int r = boxRow * 3; r < boxRow * 3 + 3; r++) {
+                    for (int c = boxCol * 3; c < boxCol * 3 + 3; c++) {
+                        int val = board[r][c];
+                        if (val != 0) {
+                            if (seen[val]) {
+                                errors.add("Box (" + boxRow + "," + boxCol + ") duplicate " + val);
+                            }
+                            seen[val] = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public boolean isValid(int x, int y, int[][] board) {
+        this.board = board;
+        return isValidCell(x, y, board[x][y]);
+    }
+    
+    public void RowDuplicateValidator() {
+        checkRowsForDuplicates();
+    }
+    
+    public void ColumnDuplicateValidator() {
+        checkColumnsForDuplicates();
+    }
+    
+    public void BoxDuplicateValidator() {
+        checkBoxesForDuplicates();
     }
 }

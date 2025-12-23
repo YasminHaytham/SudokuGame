@@ -12,13 +12,19 @@ public class SudokuViewAdapter implements Controllable{
 
     @Override
     public void startNewGame() throws IOException {
-        controller.abandonCurrentGame();
+        try {
+            controller.abandonCurrentGame();
+        } catch (IOException | NotFoundException e) {
+           throw new IOException("Failed to abandon current game: " + e.getMessage());
+        }
     }
 
     @Override
     public boolean[] getCatalog() {
+        
         Catalog catalog = controller.getCatalog();
-        return new boolean[]{catalog.checkGames()[0], catalog.checkGames()[1]};
+        boolean[] status = catalog.checkGames();
+        return status;
     }
 
     @Override
@@ -51,32 +57,46 @@ public class SudokuViewAdapter implements Controllable{
         controller.driveGames(Sourcegame);
     }
 
-    @Override
-     public boolean[][] verifyGame(int[][] game) {
+@Override
+public boolean[][] verifyGame(int[][] game) {
+    Game g = new Game(game);
+    String result = controller.verifyGame(g);
 
-        Game g = new Game(game);
-        String result = controller.verifyGame(g);
-
-        boolean[][] validity = new boolean[9][9];
-
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                validity[i][j] = true;
-            }
+    boolean[][] validity = new boolean[9][9];
+    
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            validity[i][j] = true;
         }
+    }
 
-        if (result.startsWith("invalid")) {
-            String[] parts = result.substring(7).trim().split(" ");
-            for (String p : parts) {
-                String[] xy = p.split(",");
-                int x = Integer.parseInt(xy[0]);
-                int y = Integer.parseInt(xy[1]);
-                validity[x][y] = false;
-            }
-        }
-
+    if (result == null || result.equals("incomplete") || result.equals("valid")) {
         return validity;
     }
+
+    else if (result.startsWith("invalid")) {
+        try {
+            String coordinatesPart = result.substring(7).trim();
+            if (!coordinatesPart.isEmpty()) {
+                String[] parts = coordinatesPart.split(" ");
+                for (String p : parts) {
+                    if (!p.isEmpty()) {
+                        String[] xy = p.split(",");
+                        int x = Integer.parseInt(xy[0]);
+                        int y = Integer.parseInt(xy[1]);
+                        
+                        if (x >= 0 && x < 9 && y >= 0 && y < 9) {
+                            validity[x][y] = false;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing invalid cells: " + e.getMessage());
+        }
+    }
+    return validity;
+}
 
     @Override
     public int[][] solveGame(int[][] game) throws InvalidGameException {
@@ -93,8 +113,11 @@ public class SudokuViewAdapter implements Controllable{
 
         return result;
     }
-
-    
+    @Override
+    public int[][] undoLastAction() throws IOException {
+        Game game = controller.undoLastAction();  
+        return game.getBoard();
+    }
 
     @Override
     public void logUserAction(UserAction userAction) throws IOException {
