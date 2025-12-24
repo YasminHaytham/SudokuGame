@@ -1,5 +1,6 @@
 package com.mycompany.sudoku;
 
+
 public class BoardFlyweight {
     private final int[][] baseBoard;
     private int[][] tempBoard;

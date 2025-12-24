@@ -19,7 +19,6 @@ public class SudokuController implements Viewable {
         this.undoManager = null; 
     }
 
-// Method to initialize undo manager when game is loaded
 private void initializeUndoManager() {
     try {
         String gameFolderPath = storage.getCurrentGameFolderPath();
@@ -41,11 +40,11 @@ private void initializeUndoManager() {
             return "valid - congratulations!";
 
         } else if (isComplete && result.startsWith("invalid")) {
-            // CASE 2: Complete but invalid
+            
             return "Complete but invalid";
 
         } else if (!isComplete && "incomplete".equals(result)) {
-            // CASE 3: Incomplete (normal state during play)
+            
             return "incomplete";
 
         } else if (!isComplete && result.startsWith("invalid")) {
@@ -151,37 +150,47 @@ private void initializeUndoManager() {
         return game;
     }
     
-    // Update logUserAction to handle null undoManager
-    @Override
-    public void logUserAction(String userAction) throws IOException {
-        if (undoManager == null) {
-            // Try to initialize undo manager
-            initializeUndoManager();
-            if (undoManager == null) {
-                // Still null, just return without logging
-                System.err.println("Warning: Cannot log action - no undo manager");
-                return;
-            }
-        }
-        
-        String clean = userAction.replace("(", "").replace(")", "");
-        String[] parts = clean.split(",");
-        
-        if (parts.length != 4) {
-            throw new IllegalArgumentException("Invalid log format: " + userAction);
-        }
-        
-       int x = Integer.parseInt(parts[0]);
-    int y = Integer.parseInt(parts[1]);
-    int oldValue = Integer.parseInt(parts[2]);
-    int newValue = Integer.parseInt(parts[3]);
     
+@Override
+public void logUserAction(String userAction) throws IOException {
+    if (undoManager == null) {
+        initializeUndoManager();
+    }
+
+    String clean = userAction.replace("(", "").replace(")", "");
+    String[] parts = clean.split(",");
+
+    int x = Integer.parseInt(parts[0]);
+    int y = Integer.parseInt(parts[1]);
+    int newValue = Integer.parseInt(parts[2]);
+    int oldValue = Integer.parseInt(parts[3]);
+
+    System.out.println("DEBUG: Logging action at (" + x + "," + y + "): " + oldValue + " -> " + newValue);
 
     undoManager.logAction(x, y, newValue, oldValue);
 
+    Game currentGame;
+    try {
+        currentGame = storage.getCurrentGame();
+        System.out.println("DEBUG: Current game empty cells: " + currentGame.getEmptyCells());
+        
+        currentGame.getBoard()[x][y] = newValue;
+        System.out.println("DEBUG: Updated board at (" + x + "," + y + ") to " + newValue);
+        
+        storage.saveCurrentGame(currentGame);
+        System.out.println("DEBUG: Game saved successfully");
+        
+    } catch (NotFoundException e) {
+        System.err.println("ERROR: Game not found: " + e.getMessage());
+        e.printStackTrace();
+    } catch (Exception e) {
+        System.err.println("ERROR: Failed to save game: " + e.getMessage());
+        e.printStackTrace();
     }
+}
+
     
-    // Update other methods that use undoManager
+   
  @Override
     public Game undoLastAction() throws IOException {
         if (undoManager == null) {
@@ -198,12 +207,12 @@ private void initializeUndoManager() {
                 throw new IOException("No game loaded");
             }
             
-            // Perform undo
+           
             undoManager.undo(currentGame);
             
-        
+        storage.saveCurrentGame(currentGame);
             
-            // Return the updated game
+            
             return currentGame;
             
         } catch (NotFoundException e) {

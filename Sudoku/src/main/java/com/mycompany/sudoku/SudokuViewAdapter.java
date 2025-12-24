@@ -3,8 +3,6 @@ package com.mycompany.sudoku;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.swing.JOptionPane;
-
 public class SudokuViewAdapter implements Controllable{
     private final Viewable controller;
     
@@ -65,65 +63,41 @@ public boolean[][] verifyGame(int[][] game) {
     String result = controller.verifyGame(g);
 
     boolean[][] validity = new boolean[9][9];
-
-    // Initialize all cells as valid
+    
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             validity[i][j] = true;
         }
     }
 
-    // Check what type of result we got
-    System.out.println("DEBUG: Verification result: " + result);
-    
-    if (result == null || result.equals("incomplete")) {
-        // For incomplete boards, return all true (no highlights)
+    if (result == null || result.equals("incomplete") || result.equals("valid")) {
         return validity;
-        
-    } else if (result.startsWith("invalid")) {
-        // Parse invalid cells
+    }
+
+    else if (result.startsWith("invalid")) {
         try {
-            // The format is "invalid x1,y1 x2,y2 ..."
-            String[] parts = result.substring(7).trim().split(" ");
-            for (String p : parts) {
-                if (!p.isEmpty()) {
-                    String[] xy = p.split(",");
-                    int x = Integer.parseInt(xy[0]);
-                    int y = Integer.parseInt(xy[1]);
-                    validity[x][y] = false;
+            String coordinatesPart = result.substring(7).trim();
+            if (!coordinatesPart.isEmpty()) {
+                String[] parts = coordinatesPart.split(" ");
+                for (String p : parts) {
+                    if (!p.isEmpty()) {
+                        String[] xy = p.split(",");
+                        int x = Integer.parseInt(xy[0]);
+                        int y = Integer.parseInt(xy[1]);
+                        
+                        if (x >= 0 && x < 9 && y >= 0 && y < 9) {
+                            validity[x][y] = false;
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
             System.err.println("Error parsing invalid cells: " + e.getMessage());
         }
-        return validity;
-        
-    } else if (result.equals("Complete but invalid")) {
-        // For complete but invalid boards, we should highlight errors
-        // But we need the actual invalid positions
-        // Let's use the validator directly
-        try {
-            EnhancedValidator validator = new EnhancedValidator();
-            String validationResult = validator.verifyGame(g);
-            if (validationResult.startsWith("invalid")) {
-                String[] parts = validationResult.substring(7).trim().split(" ");
-                for (String p : parts) {
-                    String[] xy = p.split(",");
-                    int x = Integer.parseInt(xy[0]);
-                    int y = Integer.parseInt(xy[1]);
-                    validity[x][y] = false;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error validating complete board: " + e.getMessage());
-        }
-        return validity;
-        
-    } else {
-        // For "valid - congratulations!" or any other valid result
-        return validity;
     }
+    return validity;
 }
+
     @Override
     public int[][] solveGame(int[][] game) throws InvalidGameException {
            Game g = new Game(game);

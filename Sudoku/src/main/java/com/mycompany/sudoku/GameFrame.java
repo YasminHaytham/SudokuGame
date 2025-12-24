@@ -15,28 +15,27 @@ public class GameFrame extends javax.swing.JFrame {
     SudokuViewAdapter viewer = new SudokuViewAdapter(controller);
     private int[][] board;
 
-       private int[][] originalBoard;   // Original board (to track which cells were empty)
-    private boolean[][] editableCells; // Which cells can be edited
-    
+       private int[][] originalBoard;  
+    private boolean[][] editableCells; 
     public GameFrame(int[][] board) {
         this.board = board;
         
-        // Store original board
+        
         this.originalBoard = new int[9][9];
         for (int i = 0; i < 9; i++) {
             System.arraycopy(board[i], 0, originalBoard[i], 0, 9);
         }
         
-        // Track which cells are editable (originally empty)
+        
         this.editableCells = new boolean[9][9];
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                editableCells[i][j] = (board[i][j] == 0); // Empty cells are editable
+                editableCells[i][j] = (board[i][j] == 0); 
             }
         }
         
         initComponents();
-        setupCellEditability();  // Make only empty cells editable
+        setupCellEditability();  
         attachAutoSaveAll();
         updateBoardUI();
     }
@@ -50,10 +49,10 @@ public class GameFrame extends javax.swing.JFrame {
                 int row = (i - 1) / 9;
                 int col = (i - 1) % 9;
                 
-                // Only make originally empty cells editable
+                
                 tf.setEditable(editableCells[row][col]);
                 
-                // Set background color to differentiate
+                
                 if (!editableCells[row][col]) {
                     tf.setBackground(Color.LIGHT_GRAY);
                 }
@@ -66,15 +65,14 @@ public class GameFrame extends javax.swing.JFrame {
 
 private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
     try {
-        // Only log if values are different AND cell is editable
+       
         if (editableCells[x][y] && oldValue != newValue) {
-            // Create UserAction object - check the constructor order
-            // Assuming: UserAction(x, y, oldValue, newValue)
-            UserAction action = new UserAction(x, y, oldValue, newValue);
+           
+            UserAction action = new UserAction(x, y, newValue, oldValue);
             
             System.out.println("DEBUG: Creating UserAction: " + action.toString());
             
-            // Log through viewer
+          
             viewer.logUserAction(action);
         }
     } catch (Exception e) {
@@ -83,7 +81,7 @@ private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
     }
 }
  private void attachAutoSave(JTextField textField, int x, int y) {
-        // Only attach listener to editable cells
+        
         if (!editableCells[x][y]) {
             return;
         }
@@ -112,22 +110,22 @@ private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
                     int newValue = newText.isEmpty() ? 0 : Integer.parseInt(newText);
                     int oldValue = previousValue.isEmpty() ? 0 : Integer.parseInt(previousValue);
                     
-                    // Validate the value is 1-9 (or 0 for empty)
+                  
                     if (newValue < 0 || newValue > 9) {
                         textField.setText(previousValue);
                         return;
                     }
                     
-                    // Only log if cell was originally empty AND value actually changed
+                    
                     if (editableCells[x][y] && newValue != oldValue) {
-                        // Update the board
+                       
                         board[x][y] = newValue;
                         
-                        // Log the action
+                       
                         logUserActionForCell(x, y, oldValue, newValue);
                     }
                     
-                    // Update previous value for next change
+                    
                     previousValue = newText;
                     
                 } catch (NumberFormatException ex) {
@@ -139,11 +137,11 @@ private void logUserActionForCell(int x, int y, int oldValue, int newValue) {
 
     private void updateUndoButtonState() {
     try {
-        // Check if there's a current game loaded
+        
         GameStorage storage = new GameStorage();
         boolean hasCurrentGame = storage.getCurrentGame() != null;
         
-        // Enable/disable undo button based on availability
+
         UndoButton.setEnabled(hasCurrentGame);
         
         if (hasCurrentGame) {
@@ -447,7 +445,7 @@ private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {
             return;
         }
         
-        // Highlight invalid cells
+        
         int invalidCount = 0;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -491,10 +489,10 @@ private boolean isBoardComplete() {
     return true;
 }
 
-// Helper method to get cell by coordinates
+
 private JTextField getCell(int row, int col) {
     try {
-        int index = row * 9 + col + 1;  // jTextField1 to jTextField81
+        int index = row * 9 + col + 1;  
         Field f = GameFrame.class.getDeclaredField("jTextField" + index);
         f.setAccessible(true);
         return (JTextField) f.get(this);
@@ -517,16 +515,16 @@ private void SolveButtonActionPerformed(java.awt.event.ActionEvent evt) {
             return;
         }
         
-        // Apply solution to board
+       
         for (int i = 0; i < solution.length; i++) {
             int row = solution[i][0];
             int col = solution[i][1];
             int value = solution[i][2];
             
-            // Update board
+           
             board[row][col] = value;
             
-            // Update UI
+           
             updateCell(row, col, value);
         }
         
@@ -551,7 +549,7 @@ private void updateCell(int row, int col, int value) {
         field.setAccessible(true);
         javax.swing.JTextField textField = (javax.swing.JTextField) field.get(this);
         textField.setText(value == 0 ? "" : String.valueOf(value));
-        textField.setBackground(java.awt.Color.GREEN);  // Highlight solved cells
+        textField.setBackground(java.awt.Color.GREEN);  
     } catch (Exception e) {
         e.printStackTrace();
     }

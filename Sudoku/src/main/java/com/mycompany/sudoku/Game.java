@@ -70,7 +70,6 @@ public class Game {
         return positions.toArray(new int[0][]);
     }
     
-    // NEW METHOD: Get copy of board (needed by flyweight)
     public int[][] getBoardCopy() {
         int[][] copy = new int[9][9];
         for (int i = 0; i < 9; i++) {

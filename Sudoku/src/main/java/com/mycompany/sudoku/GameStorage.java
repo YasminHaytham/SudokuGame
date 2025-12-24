@@ -90,7 +90,7 @@ public class GameStorage {
         return true;
     }
 
-    // for current game
+   
     public boolean saveCurrentGame(Game game) throws IOException {
         Path gameFile = baseDir.resolve("incomplete").resolve(CurrentGameName);
         try{
